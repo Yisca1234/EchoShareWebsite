@@ -1,0 +1,24 @@
+.new-post-section {
+  padding: 20px;
+  border: 2px solid black;
+  border-radius: 5px;
+  width: 30%;
+  margin-top: 5%;
+  height: 80vh;
+}
+
+.image-preview {
+  margin-top: 10px;
+  position: relative;
+}
+
+.image-preview img {
+  height: auto;
+  width: 80%;
+  border: 2px solid black;
+  margin-bottom: 10px;
+}
+
+.box1{
+  border: 2px solid purple;
+}
