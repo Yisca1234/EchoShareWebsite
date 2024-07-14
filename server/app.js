@@ -25,7 +25,7 @@ app.use('/api', authRoutes);
 app.use('/api/post', postRoutes);
 app.use('/api/user', userRoutes);
 
-// app.use(express.static(path.resolve(__dirname, './public/')));
-// app.get(/.*/, (req, res) => res.sendFile(path.resolve(__dirname, './public/index.html')));
+app.use(express.static(path.resolve(__dirname, './public/')));
+app.get(/.*/, (req, res) => res.sendFile(path.resolve(__dirname, './public/index.html')));
 
 module.exports = app;
