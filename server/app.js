@@ -10,12 +10,6 @@ const userRoutes = require('./routes/user');
 
 const app = express();
 
-const corsOptions = {
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // List the allowed methods
-  preflightContinue: false,
-  optionsSuccessStatus: 204,
-  maxAge: 600, // Cache the preflight response for 10 minutes
-};
 
 // app.use(cors());
 app.use(express.json({ limit: '10mb' }));
