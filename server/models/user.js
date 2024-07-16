@@ -19,7 +19,12 @@ const userSchema = new mongoose.Schema(
         {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User',
-          unique: true,
+          validate: {
+            validator: function(v) {
+              return v.length === new Set(v.map(String)).size;
+            },
+            message: props => `Duplicate ids found in following array: ${props.value}`
+          },
         },
       ],
       bookmarkedPosts: [
@@ -65,7 +70,12 @@ const userSchema = new mongoose.Schema(
         {
           type: mongoose.Schema.Types.ObjectId,
           ref: 'User',
-          unique: true,
+          validate: {
+            validator: function(v) {
+              return v.length === new Set(v.map(String)).size;
+            },
+            message: props => `Duplicate ids found in following array: ${props.value}`
+          },
         },
       ],
       posts: [
