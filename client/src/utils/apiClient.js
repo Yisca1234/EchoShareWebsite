@@ -2,7 +2,7 @@ import axios from 'axios';
 
 
 const apiClient = axios.create({
-  baseURL: 'https://16.170.203.43:5000/api', 
+  baseURL: 'https://app.echo-share.click/api', 
 });
 
 
