@@ -92,6 +92,10 @@ const Profile = () => {
     }
   }
 
+  const handleHome = () => {
+    navigate('/home');
+  };
+
 
   return(
     <div className='row-container1 no-scroll'>
@@ -132,10 +136,10 @@ const Profile = () => {
               Save, I am ready to say my voice!
             </Button>
             
-            {/* <Form.Group controlId="formUserimage">
-              <Form.Label>The image of the channel</Form.Label>
-              <Form.Control type="text" onChange={handleChange} name='imageLink'/>
-            </Form.Group> */}
+
+            <Button variant="secondary" onClick={handleHome}>
+              Dont want to do it yet
+            </Button>
           </Form>
         </Modal.Body>
         {/* <Modal.Footer>
