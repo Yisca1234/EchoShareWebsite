@@ -55,8 +55,7 @@ const Post = ({ post, setViewedPosts, viewedPosts }) => {
   useEffect(() => {
     const viewFunction = async () => {
       if (inView) {
-        setViewedPosts(pre=>{return [...pre, postId]})
-      }
+        setViewedPosts(prevPosts => [...prevPosts, postId]);      }
     }
     viewFunction();
   }, [inView]);
