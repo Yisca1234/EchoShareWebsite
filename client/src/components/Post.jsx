@@ -53,8 +53,8 @@ const Post = ({ post, incrementView }) => {
 
 
   useEffect(() => {
-    console.log(inView);
     if (inView) {
+      console.log(postId);
       incrementView(postId);
     }
   }, [inView]);
