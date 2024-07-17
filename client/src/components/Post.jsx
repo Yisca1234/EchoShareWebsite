@@ -53,11 +53,9 @@ const Post = ({ post, setViewedPosts, viewedPosts }) => {
 
 
   useEffect(() => {
-    const viewFunction = async () => {
-      if (inView) {
-        setViewedPosts(prevPosts => [...prevPosts, postId]);      }
+    if (inView) {
+      setViewedPosts(prevPosts => [...prevPosts, postId]);      
     }
-    viewFunction();
   }, [inView]);
 
   const cloud_name = "dojexlq8y"
