@@ -10,7 +10,7 @@ import {formatPostDate} from '../utils/formatPostDate.js';
 import { useInView } from 'react-intersection-observer';
 
 
-const Post = ({ post, setViewedPosts, viewedPosts }) => {
+const Post = ({ post, incrementView }) => {
   const [isFollow, setIsFollow] = useState(null)
   const [isActive, setIsActive] = useState({
     likeButton: false,
@@ -54,7 +54,7 @@ const Post = ({ post, setViewedPosts, viewedPosts }) => {
 
   useEffect(() => {
     if (inView) {
-      setViewedPosts(prevPosts => [...prevPosts, postId]);      
+      incrementView(postId);
     }
   }, [inView]);
 

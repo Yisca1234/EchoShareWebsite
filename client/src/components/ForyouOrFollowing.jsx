@@ -69,6 +69,10 @@ const ContentSection = () => {
     }
   }, []);
 
+  const incrementView = (postId)=> {
+    setViewedPosts(prevPosts => [...prevPosts, postId]);      
+  }
+
 
   return (
     <Container 
@@ -112,8 +116,7 @@ const ContentSection = () => {
                   <div className="post-margin postOfList" key={index}>
                   <Post
                     post={post}
-                    setViewedPosts={setViewedPosts}
-                    viewedPosts={viewedPosts}
+                    incrementView={incrementView}
                   />
                   </div>
                 ))}
