@@ -9,11 +9,11 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  max-height: 95vh;
-  overflow-y: auto;
 }
 
 .modal-content {
+  max-height: 95vh;
+  overflow-y: auto;
   background: #ffffff;
   padding: 30px;
   border-radius: 12px;

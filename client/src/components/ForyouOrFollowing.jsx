@@ -51,6 +51,7 @@ const ContentSection = () => {
 
 
   const intervalFunction = async ()=> {
+    
     if(viewedPosts.length>0){
       await dispatch(handleView(viewedPosts, idFollower));
       setViewedPosts([]);
