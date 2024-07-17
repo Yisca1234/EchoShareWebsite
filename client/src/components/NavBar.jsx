@@ -43,19 +43,34 @@ const Sidebar = () => {
           <Image src="echoShare.png" fluid roundedCircle className='brand' />
         </Navbar.Brand>
         <Nav.Link as={Link} to="/home" className="mt-3">
-          <FaHome />
+          <div className='box11'>
+            <FaHome />
+            <h5 className='text5'>Home</h5>
+          </div>
         </Nav.Link>
         <Nav.Link as={Link} to="/profile">
-          <FaIdBadge />
+          <div className='box11'>
+            <FaIdBadge />
+            <h5 className='text5'>My Profile</h5>
+          </div>
         </Nav.Link>
         <Nav.Link as={Link} to="/subscribedChannelsList">
-          <FaClipboardList />
+          <div className='box11'>
+            <FaClipboardList />
+            <h5 className='text6'>Subscribed Channels</h5>
+          </div>
         </Nav.Link>
         <Nav.Link as={Link} to="/bookmarkedPosts">
-          <FaBookmark />
+          <div className='box11'>
+            <FaBookmark />
+            <h5 className='text6'>Bookmark Posts</h5>
+          </div>
         </Nav.Link>
         <Nav.Link as={Link} to="/createNewPost">
-          <FaPlus />
+          <div className='box11'>
+            <FaPlus />
+            <h5 className='text6'>Create New Post</h5>
+          </div>
         </Nav.Link>
       </Nav>
       <div className="profile-image-wrapper">

@@ -5,12 +5,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import {getFollowing, getUserId, getBookmaredPosts} from '../redux/user/selectors.js';
 import { useState, useEffect } from 'react';
 import {handleFollow, handleBookmark} from '../redux/user/actions.js'
-import {handlePostLike, handleView} from '../redux/post/actions.js'
+import {handlePostLike} from '../redux/post/actions.js'
 import {formatPostDate} from '../utils/formatPostDate.js';
 import { useInView } from 'react-intersection-observer';
 
 
-const Post = (post) => {
+const Post = ({ post, setViewedPosts, viewedPosts }) => {
   const [isFollow, setIsFollow] = useState(null)
   const [isActive, setIsActive] = useState({
     likeButton: false,
@@ -55,8 +55,7 @@ const Post = (post) => {
   useEffect(() => {
     const viewFunction = async () => {
       if (inView) {
-
-        await dispatch(handleView(postId, idFollower));    
+        setViewedPosts(pre=>{return [...pre, postId]})
       }
     }
     viewFunction();

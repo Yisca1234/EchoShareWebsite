@@ -50,7 +50,6 @@ const postReducer = (state = initialState, action) => {
       }
 
     case SUCCESS_LIKE_ADDED:
-      console.log('hh');
       return {
         ...state,
         posts: {
@@ -117,33 +116,37 @@ const postReducer = (state = initialState, action) => {
 
 
     case VIEW_SUCCESS:
-
+      const updatedForYou = state.posts.foryou.map(post => {
+        if (action.payload.updatedArray.includes(post._id)) {
+          return {
+            ...post,
+            data: {
+              ...post.data,
+              views: [action.payload.userId, ...post.data.views]
+            }
+          };
+        }
+        return post;
+      });
+      
+      const updatedFollowing = state.posts.following.map(post => {
+        if (action.payload.updatedArray.includes(post._id)) {
+          return {
+            ...post,
+            data: {
+              ...post.data,
+              views: [action.payload.userId, ...post.data.views]
+            }
+          };
+        }
+        return post;
+      });
       return {
         ...state,
         posts: {
-          foryou: state.posts.foryou.map(post => 
-            post._id === action.payload.postId
-            ? { 
-              ...post, 
-              data: { 
-                ...post.data, 
-                views: [action.payload.userId ,...post.data.views]
-              }
-            }
-            : post
-          ),
-          following: state.posts.following.map(post => 
-            post._id === action.payload.postId
-            ? { 
-              ...post, 
-              data: { 
-                ...post.data, 
-                views: [action.payload.userId ,...post.data.views]
-              }
-            }
-            : post
-          ),
-        },
+          foryou: updatedForYou,
+          following: updatedFollowing
+        }
       };
 
     case LOGOUT:

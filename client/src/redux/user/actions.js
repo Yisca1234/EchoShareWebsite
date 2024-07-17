@@ -74,9 +74,9 @@ export const bookmarkLikeSuccess = (userId, postId) => ({
   payload: {userId, postId },
 });
 
-export const bookmarkViewSuccess = (userId, postId) => ({
+export const bookmarkViewSuccess = (updatedArray, postId) => ({
   type: BOOKMARK_VIEW_SUCCESS,
-  payload: {userId, postId },
+  payload: {updatedArray, postId },
 });
 
 export const bookmarkUnlikeSuccess = (userId, postId) => ({

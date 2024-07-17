@@ -7,11 +7,15 @@ import { useState, useEffect, useRef } from 'react';
 import { getAllPosts } from '../redux/post/actions.js';
 import {getUserId} from '../redux/user/selectors.js'
 import { useInView } from 'react-intersection-observer';
+import { handleView } from '../redux/post/actions.js'
+
 
 
 const ContentSection = () => {
   const [loading, setLoading] = useState(false);
   const [typeOfSortOfSection, setTypeOfSortOfSection] = useState('foryou');
+  const [viewedPosts, setViewedPosts] = useState([]);
+
   const { ref, inView } = useInView({
     threshold: 0.1,
   });
@@ -46,7 +50,23 @@ const ContentSection = () => {
   };
 
 
+  const intervalFunction = async ()=> {
+    if(viewedPosts.length>0){
+      await dispatch(handleView(viewedPosts, idFollower));
+      setViewedPosts([]);
+    }
+  }
 
+  useEffect(() => {
+    const intervalId = setInterval(intervalFunction, 45000);
+
+    return () => {
+      clearInterval(intervalId);
+      if(viewedPosts.length>0){
+        intervalFunction();
+      }
+    }
+  }, []);
 
 
   return (
@@ -89,7 +109,11 @@ const ContentSection = () => {
               <>
                 {allPosts[typeOfSortOfSection].map((post, index) => (
                   <div className="post-margin postOfList" key={index}>
-                    <Post {...post} />
+                  <Post
+                    post={post}
+                    setViewedPosts={setViewedPosts}
+                    viewedPosts={viewedPosts}
+                  />
                   </div>
                 ))}
                 <div className='box10' ref={ref}>preparing more posts for you...</div>

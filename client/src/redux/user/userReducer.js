@@ -159,6 +159,32 @@ const userReducer = (state = initialState, action) => {
         error: null,
       };
     }
+
+    case BOOKMARK_VIEW_SUCCESS: {
+      const updatedBookmarkPosts = state.user.data.bookmarkedPosts.map(post => {
+        if (action.payload.updatedArray.includes(post._id)) {
+          return {
+            ...post,
+            data: {
+              ...post.data,
+              views: [action.payload.userId, ...post.data.views]
+            }
+          };
+        }
+        return post;
+      });
+
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          data: {
+            ...state.user.data,
+            bookmarkedPosts: updatedBookmarkPosts
+          }
+        }
+      };  
+    }
     
     case UNFOLLOW_SUCCESS: {
 

@@ -164,18 +164,19 @@ const handlePostLike = async (req, res) => {
 
 
 const handleincrementViews = async (req, res) => {
-  try {
-    const {userId} = req.body;
-    const postId = req.params.id;
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).send({ message: 'Post not found' });
+  
+  const {userId, viewedPosts} = req.body;
+  viewedPosts.filter( async (postId)=> {
+    try{
+      const post = await Post.findById(postId);
+      await post.incrementViews(userId);
+      return true;
+    } catch{
+      return false;
     }
-    await post.incrementViews(userId);
-    res.send({ message: 'success' });
-  } catch (error) {
-    res.status(500).send({ message: 'Server error', error: error.message });
-  };
+  })
+  res.send({ viewedPosts:  viewedPosts});
+
 }
 
 module.exports = { 

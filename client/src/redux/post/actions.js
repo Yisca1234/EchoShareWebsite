@@ -8,7 +8,7 @@ import {
 } from './actionTypes';
 import apiClient from '../../utils/apiClient.js'
 
-import {handleBookmarkChanges} from '../user/actions.js'
+import {handleBookmarkChanges, bookmarkViewSuccess} from '../user/actions.js'
 
 export const logout1 = () => ({
   type: LOGOUT,
@@ -35,9 +35,9 @@ export const postRemoveLike = (postId, userId) => ({
 });
 
 
-export const view_success = (postId, userId) => ({
+export const view_success = (updatedArray, userId) => ({
   type: VIEW_SUCCESS,
-  payload: { postId, userId },
+  payload: { updatedArray, userId },
 })
 
 export const getAllPosts = (userId, limit, exclude, typeOfSort) => async (dispatch) =>{
@@ -65,13 +65,16 @@ export const handlePostLike = (postId, userId, pressLike) => async (dispatch) =>
 
 }
 
-export const handleView = (postId, userId) => async (dispatch) =>{
+export const handleView = (viewedPosts, userId) => async (dispatch) =>{
 
-  const response = await apiClient.put(`/post/${postId}/view`, { userId });
-  if(response.data.message == 'success'){
-    await dispatch(view_success(postId, userId));
-  } else {
-    console.log('didnt increment view to the post ', postId);
+  const response = await apiClient.put('/post/view', { viewedPosts, userId });
+  const updatedArray = response.data.viewedPosts;
+  if(updatedArray.length<viewedPosts.length){
+    console.log('didnt increment view all the posts ');
+  }
+  if(updatedArray.length>0){
+    await dispatch(view_success(updatedArray, userId));
+    await dispatch(bookmarkViewSuccess(updatedArray, userId));
   }
 
 }

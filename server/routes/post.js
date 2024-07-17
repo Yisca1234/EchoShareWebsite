@@ -15,7 +15,7 @@ router.post('/',auth, getPosts);
 router.post('/createNewPost', auth, createNewPost);
 router.delete('/deletePost/:postId', auth, deletePost);
 router.put('/like', auth, handlePostLike);
-router.put('/:id/view', auth, handleincrementViews)
+router.put('/view', auth, handleincrementViews)
 
 
 module.exports = router;

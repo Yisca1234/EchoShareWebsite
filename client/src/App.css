@@ -182,7 +182,8 @@ Button:hover {
 
 
 .box11{
-  
+  width: 60px;
+  text-align: center;
 }
 .container4 {
   text-align: center;
@@ -211,6 +212,16 @@ Button:hover {
   cursor: pointer;
   font-weight: normal;
 }
+
+.text5{
+  color: gray;
+  font-size: 16px;
+}
+.text6{
+  color: gray;
+  font-size: 13px;
+}
+
 .text2:hover {
   text-decoration: underline;
 }
