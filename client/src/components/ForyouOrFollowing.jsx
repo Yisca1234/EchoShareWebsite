@@ -57,7 +57,7 @@ const ContentSection = () => {
       setViewedPosts([]);
     }
   }
-
+  console.log(viewedPosts);
   useEffect(() => {
     const intervalId = setInterval(intervalFunction, 45000);
   
@@ -71,7 +71,7 @@ const ContentSection = () => {
   const incrementView = (postId)=> {
     setViewedPosts(prevPosts =>{
       const newArray = [...prevPosts, postId];
-      console.log(newArray, postId);
+      // console.log(newArray, postId);
       return newArray;
     });       
   }
