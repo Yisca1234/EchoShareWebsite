@@ -4,16 +4,36 @@ import Post from './Post.jsx';
 import '../styles/CustomScrollbar.css'; 
 import { getBookmaredPosts } from '../redux/user/selectors.js';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
 
 
 const BookmarkBar = () => {
-  //do the inView to the bookmark posts bar
+  const viewedPostsArray = useRef([]);
   const navigate = useNavigate();
-
   const handleHome = () => {
     navigate('/home');
   }
 
+  const intervalFunction = async ()=> {
+    if(viewedPostsArray.current.length>0){
+      await dispatch(handleView(viewedPostsArray.current, userId));
+      viewedPostsArray.current = [];   
+    }
+  }
+  useEffect(() => {
+    const intervalId = setInterval(intervalFunction, 45000);
+  
+    return () => {
+      clearInterval(intervalId);
+      intervalFunction();
+    };
+  }, []);
+  
+
+  const incrementView = (postId)=> {
+    viewedPostsArray.current.push(postId);    
+  }
+  
   const listPosts= useSelector(getBookmaredPosts);
   return (
     <Container className="box5 container1">
@@ -21,7 +41,10 @@ const BookmarkBar = () => {
         <div className="post-list">
           {listPosts.map((post, index) => (
             <div className="post-margin postOfList" key={index}>
-              <Post {...post} />
+              <Post
+                post={post}
+                incrementView={incrementView}
+              />
             </div>
           ))}
         </div>

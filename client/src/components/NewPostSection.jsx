@@ -25,6 +25,11 @@ const NewPostSection = () => {
   const api_key = "459359754131954"
   const cloud_name = "dojexlq8y"
 
+
+  const handleProfile = () => {
+    navigate('/profile');
+  }
+
   const handleTextChange = (e) => {
     setPostContent(e.target.value);
   };
@@ -119,6 +124,7 @@ const NewPostSection = () => {
       <div className='box8'>
         <h1>Hey Buddy</h1>
         <h3>I think you need first to create your channel</h3>
+        <h4 className='text3' onClick={handleProfile}>Lets do it!</h4>
       </div>}
     </div>
   );
