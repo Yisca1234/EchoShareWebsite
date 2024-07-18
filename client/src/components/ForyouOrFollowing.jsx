@@ -52,7 +52,7 @@ const ContentSection = () => {
 
   const intervalFunction = async ()=> {
     if(viewedPostsArray.current.length>0){
-      await dispatch(handleView(viewedPostsArray.current, idFollower));
+      await dispatch(handleView(viewedPostsArray.current, userId));
       viewedPostsArray.current = [];   
     }
   }
