@@ -1,0 +1,57 @@
+
+
+/* Remove visual scrollbar while allowing scrolling */
+.custom-scroll { /* Still allow scrolling */
+  scrollbar-width: none; /* For Firefox */
+}
+
+.custom-scroll::-webkit-scrollbar {
+  display: none; /* For Webkit-based browsers like Chrome */
+}
+
+.fixed-nav {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  border-bottom: 1px solid lightgray; /* Bottom border for Nav */
+  box-sizing: content-box;
+  display: flex;
+  align-items: center;
+}
+
+.post-list {
+  position: relative;
+  z-index: 5;
+  padding-top: 5px; /* Reduced padding between navbar and posts */
+}
+
+.post-margin {
+  margin-top: 10px; /* Adjusted margin between Post components */
+}
+
+.contentBar{
+  padding-top: 0;
+}
+.con{
+  display: inline-block;
+  padding-right: 8px;
+}
+.postOfList:hover,
+.navItem:hover{
+  background-color: rgb(238, 233, 233);
+}
+.navItem:hover {
+  cursor: pointer;
+}
+
+.navItem{
+  width: 50%;
+}
+
+.main-section{
+  width: 80%;
+}
+
+.active2{
+  background-color: rgb(238, 233, 233);
+}

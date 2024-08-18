@@ -1,0 +1,29 @@
+.not-found-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #e6e6dd;
+}
+
+.error-text {
+  font-size: 2rem;
+  text-align: center;
+  color: black;
+}
+
+.home-link {
+  text-decoration: none;
+  color: white;
+  background-color: black;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: bold;
+  margin-top: 20px;
+  transition: all 0.3s ease;
+}
+
+.home-link:hover {
+  background-color: #333;
+}

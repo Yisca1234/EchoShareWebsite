@@ -1,0 +1,54 @@
+.sidebar {
+  padding-top: 10px; 
+  padding-left: 5px;
+  border-right: 2px solid black;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed;
+
+  left: 0;
+  top: 0;
+  width: 10%; 
+  height: 100vh;
+  display: inline-block;
+  
+}
+.flex-column{
+  row-gap: 10px;
+}
+
+.mt-auto {
+  margin-top: auto; /* Pushes the Nav to the top, leaving space at the bottom */
+}
+
+.profile-image-wrapper {
+  /* position: relative;
+  margin-top: auto;  */
+  text-align: center;
+  padding-bottom: 20px; 
+}
+
+.nav-link {
+  font-size: 1.5em; 
+  text-align: center;
+}
+
+/* .profile-image-wrapper {
+  position: relative;
+  text-align: center;
+  padding-bottom: 20px; 
+} */
+
+.profile-image-wrapper:hover {
+  cursor: pointer;
+}
+.logout{
+  max-width: 60px;
+}
+.brand{
+  max-width: 60px;
+  border: 3px solid black;
+}
+
