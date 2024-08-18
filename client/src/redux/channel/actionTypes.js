@@ -1,0 +1,2 @@
+export const SUCCESS_CHANNELS = 'SUCCESS_CHANNELS';
+export const LOGOUT = 'LOGOUT';
