@@ -171,7 +171,7 @@ const Post = ({ post, incrementView }) => {
         <Col >
           <FaEye /> {views.length}
         </Col>
-        <Col className={`pointer ${isBookmarked && 'active1'} ${loading[2] && 'loading1'}`} disabled={loading[2]} onClick={()=>{handlePostButtons('bookmarkButton',isBookmarked)}}>
+        <Col className={`pointer ${isBookmarked && 'active3'} ${loading[2] && 'loading1'}`} disabled={loading[2]} onClick={()=>{handlePostButtons('bookmarkButton',isBookmarked)}}>
           <FaBookmark />
         </Col>
         <Col>

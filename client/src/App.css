@@ -236,11 +236,13 @@ Button:hover {
 }
 
 .active1{
-  background-color: #007bff;
-  border-radius: 50%;
+  color: #007bff;
+}
+.active3{
+  color: #FFC107;
 }
 .loading1{
-  background-color: gray;
+  color: gray;
 }
 
 
