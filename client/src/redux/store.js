@@ -1,10 +1,16 @@
 
-
-
-import { createStore, applyMiddleware, compose  } from 'redux';
+import { persistStore, persistReducer } from 'redux-persist';
+import storageSession from 'redux-persist/lib/storage/session';import { createStore, applyMiddleware, compose } from 'redux';
 import {thunk} from 'redux-thunk';
-import rootReducer from './rootReducer.js'
+import rootReducer from './rootReducer.js';
 
+const persistConfig = {
+  key: 'root',
+  storage: storageSession,
+  whitelist: ['user', 'auth'],
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const composeEnhancers =
   window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__?.({
@@ -12,9 +18,11 @@ const composeEnhancers =
     traceLimit: 25,
   }) || compose;
 
-const store = createStore(
-  rootReducer,  
-  composeEnhancers(applyMiddleware(thunk)) // Applying middleware and dev tools
+export const store = createStore(
+  persistedReducer,
+  composeEnhancers(applyMiddleware(thunk))
 );
 
-export default store;
+export const persistor = persistStore(store);
+
+
