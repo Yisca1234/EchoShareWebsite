@@ -63,6 +63,8 @@ const ChannelSuggestionSection = () => {
     });
   }
 
+  // to do: when the mouse is one a certain channel it will show card with more details about the channel
+
   return (
     <Container className="border p-3 mt-4" style={{display: 'inline-block', height: '100vh'}}>
       <Row>

@@ -244,5 +244,9 @@ Button:hover {
 .loading1{
   color: gray;
 }
+.hover1:hover{
+  color: #FF5722;
+  cursor: pointer;
+}
 
 

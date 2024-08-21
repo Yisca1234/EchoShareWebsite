@@ -14,7 +14,6 @@ import { useInView } from 'react-intersection-observer';
 const ContentSection = () => {
   const [loading, setLoading] = useState(false);
   const [typeOfSortOfSection, setTypeOfSortOfSection] = useState('foryou');
-  const [isFirstRender, setIsFirstRender] = useState(true);
   const viewedPostsArray = useRef([]);
   const { ref, inView } = useInView({
     threshold: 0.1,
@@ -28,18 +27,14 @@ const ContentSection = () => {
   }, [typeOfSortOfSection]);
 
   useEffect(() => {
-    if (isFirstRender) {
-      setIsFirstRender(false);
-      return;
-    }
     if(typeOfSortOfSection === 'following'){
-      function1();
+      function1(true);
     }
   }, [list_following]);
 
 
-  const fetchPosts = async () => {
-    const exclude = allPosts[typeOfSortOfSection].length === 0 ? null : allPosts[typeOfSortOfSection].map(post => post._id).join(',');
+  const fetchPosts = async (flag = false) => {
+    const exclude = allPosts[typeOfSortOfSection].length === 0 || flag ? null : allPosts[typeOfSortOfSection].map(post => post._id).join(',');
     await dispatch(getAllPosts(userId, 10, exclude, typeOfSortOfSection));
   };
 
@@ -80,9 +75,9 @@ const ContentSection = () => {
     viewedPostsArray.current.push(postId);    
   }
 
-  const function1 = async () => {
+  const function1 = async (flag = false) => {
     setLoading(true);
-    await fetchPosts();
+    await fetchPosts(flag);
     setLoading(false);
   }
 

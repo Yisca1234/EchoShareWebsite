@@ -1,25 +1,24 @@
 import { useDispatch, useSelector } from 'react-redux';
 import Channel from './Channel.jsx'
 import { Container, Row, Col, Image, Button } from 'react-bootstrap';
-import { getFollowing } from '../redux/user/selectors.js';
+import { getFollowing, getFollowers } from '../redux/user/selectors.js';
 import { useNavigate } from 'react-router-dom';
 
 
-const ChannelsSubSection = () => {
+const ChannelsSection = ({typeOfDisplay}) => {
   const navigate = useNavigate();
 
   const handleHome = () => {
     navigate('/home');
   }
-
-  const subChannels= useSelector(getFollowing);
+  const listOfChannels = typeOfDisplay === 1 ? useSelector(getFollowing) : useSelector(getFollowers);
 
   return (
     
     <Container className="container1 box5 box6" >
       <div className="">
-        {subChannels.length>0 ? 
-        subChannels.map((channel, index) => (
+        {listOfChannels.length>0 ? 
+        listOfChannels.map((channel, index) => (
         <div className="post-margin postOfList" key={index}> 
           <Channel {...channel}/>
         </div>
@@ -34,4 +33,4 @@ const ChannelsSubSection = () => {
   );
 };
 
-export default ChannelsSubSection;
+export default ChannelsSection;

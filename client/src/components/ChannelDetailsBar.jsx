@@ -81,6 +81,14 @@ const ChannelDetailsBar = () => {
     }
   };
 
+  const handleFollowing = () => {
+    navigate('/subscribedChannelsList');
+  };
+
+  const handleFollowers = () => {
+    navigate('/followersList');
+  };
+
   return (
     <div className="channel-section">
       <Modal show={modalShow} onHide={() => setModalShow(false)}>
@@ -125,7 +133,7 @@ const ChannelDetailsBar = () => {
       </div>
       <div className="short-bold-text mt-1">{username}</div>
       <div className="mt-3">
-        <strong>{numFollowing}</strong> following <strong>{Followers.length}</strong> followers
+        <strong>{numFollowing}</strong > <span className='hover1' onClick={handleFollowing}>following</span> <strong>{Followers.length}</strong> <span className='hover1' onClick={handleFollowers}>followers</span>
       </div>
       <div className="mt-3">Joining on:   <strong>{joiningDate}</strong></div>
       <div>
