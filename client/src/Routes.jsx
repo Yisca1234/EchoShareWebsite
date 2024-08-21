@@ -6,6 +6,7 @@ import Profile from './components/ProfilePage.jsx'
 import CreatePostPage from './components/CreatePost.jsx'
 import BookmarkedPostsPage from './components/BookmarkedPostsPage.jsx'
 import SubChannelsPage from './components/SubChannelsPage.jsx'
+import FollowersPage from './components/FollowersPage.jsx'
 import NotFound from './components/NotFound.jsx'
 import Modal from './components/Modal.jsx'
 import { useState, useEffect, useRef } from 'react'
@@ -18,7 +19,6 @@ import isEqual from 'lodash/isEqual';
 
 const AppRoutes = () => {
   const [showModal, setShowModal] = useState(false);
-  // const [isFirstRender, setIsFirstRender] = useState(true);
 
   const list_following = useSelector(getUserfollowing, isEqual);
   const listFollowingRef = useRef(list_following);
@@ -31,10 +31,6 @@ const AppRoutes = () => {
   }, []);
 
   useEffect(() => {
-    // if (isFirstRender) {
-    //   setIsFirstRender(false);
-    //   return;
-    // }
     if (list_following !== listFollowingRef.current) {
       deletePostsOfFollowing();
       listFollowingRef.current = list_following; // Update the ref
@@ -68,6 +64,7 @@ const AppRoutes = () => {
           <Route path="/createNewPost" element={<CreatePostPage />} />
           <Route path="/bookmarkedPosts" element={<BookmarkedPostsPage />}/>
           <Route path="/subscribedChannelsList" element={<SubChannelsPage />} />
+          <Route path="/followersList" element={<FollowersPage />} />
           <Route path="*" element={<NotFound />} /> 
         </Routes>
       }

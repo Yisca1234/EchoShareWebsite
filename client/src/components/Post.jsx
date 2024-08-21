@@ -11,7 +11,7 @@ import { useInView } from 'react-intersection-observer';
 
 
 const Post = ({ post, incrementView }) => {
-  const [isFollow, setIsFollow] = useState(null)
+  const [isFollow, setIsFollow] = useState(false);
   const [isActive, setIsActive] = useState({
     likeButton: false,
     commentButton: false,

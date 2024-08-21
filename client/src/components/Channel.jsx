@@ -1,12 +1,15 @@
 
 import { Container, Row, Col, Image, Badge, Button } from 'react-bootstrap';
 import {handleFollow} from '../redux/user/actions.js'
-import {getUserId } from '../redux/user/selectors';
+import {getUserId, getFollowing } from '../redux/user/selectors';
 import { useSelector,useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react'
 
 const Channel = (channel) => {
-  // to do: when the mouse is one a certain channel it will show card with more details about the channel
+  const [isFollow, setIsFollow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const listFollowing = useSelector(getFollowing);
+
   const dispatch = useDispatch();
   const cloud_name = "dojexlq8y";
   const {avatar, _id} = channel;
@@ -23,9 +26,30 @@ const Channel = (channel) => {
   const userId = useSelector(getUserId);
 
 
-  const handleUnFollowButton = async () => {
-    await dispatch(handleFollow(userId, _id, false));
+
+
+  const handleFollowButton = async () => {
+    handleLoading(true);
+    await dispatch(handleFollow(userId, _id, !isFollow)).then(
+      //await setIsFollow(pre=>!pre)
+    )
+    handleLoading(false);
   };
+
+  useEffect(() => {
+    const checkIfFollowing = () => {
+      const isFollowed = listFollowing.some(user => user._id === _id);
+      if(isFollowed!=isFollow){
+        setIsFollow(isFollowed);
+      }
+    };
+
+    checkIfFollowing();
+  }, [listFollowing]); 
+
+  const handleLoading = (state) => {
+    setLoading(state);
+  }
   return (
 
     <Container className="mt-4 border p-3 ">
@@ -39,7 +63,7 @@ const Channel = (channel) => {
           </div>
         </Container>
         <Col xs={3} className='con' >
-          <Button variant="primary" size="sm" onClick={handleUnFollowButton}>unfollow</Button> 
+          <Button variant="primary" size="sm" disabled={loading} className={` ${loading && 'loading1'}`} onClick={handleFollowButton}>{isFollow ? 'UnFollow' : 'Follow'}</Button> 
         </Col>
       </div>
 
