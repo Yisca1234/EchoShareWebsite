@@ -24,7 +24,7 @@ const SmallPost = ({ postShortContent }) => {
 
       <Row className="mt-2">
         <Col>
-          <p>{text}</p>
+          <p className='text7'>{text}</p>
         </Col>
       </Row>
 

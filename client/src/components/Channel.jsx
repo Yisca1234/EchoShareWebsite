@@ -16,13 +16,7 @@ const Channel = (channel) => {
   const {username, imageLink, description} = avatar;
   const namOfFollowers = avatar.Followers.length;
   const numOfPosts = avatar.posts.length;
-  let profileImage;
-  if(imageLink){
-    profileImage= `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}`;
-  }
-  else{
-    profileImage= 'account.png';
-  }
+  const profileImage = imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}` : 'account.png';
   const userId = useSelector(getUserId);
 
 

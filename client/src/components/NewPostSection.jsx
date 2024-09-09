@@ -12,12 +12,12 @@ import {addUserPost} from '../redux/user/actions.js';
 const NewPostSection = () => {
   const [postContent, setPostContent] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
-  const [massage, setMassage] = useState({
-    successReqMassage: null,
-    failureReqMassage: null
+  const [message, setmessage] = useState({
+    successReqmessage: null,
+    failureReqmessage: null
   });
-  let successReqMassage;
-  let failureReqMassage;
+  let successReqmessage;
+  let failureReqmessage;
   const navigate = useNavigate();
 
   const dispatch = useDispatch();
@@ -67,17 +67,17 @@ const NewPostSection = () => {
     try{
       const response = await apiClient.post('/post/createNewPost', {username, postContent, photoData});
       await dispatch(addUserPost(response.data.post));
-      setMassage({
-        successReqMassage: 'the post created and saved succesfully',
-        failureReqMassage: null});
+      setmessage({
+        successReqmessage: 'the post created and saved succesfully',
+        failureReqmessage: null});
       setTimeout(() => {
         navigate('/profile');
       }, 1800);
     } catch (e){
 
-      setMassage({
-        successReqMassage: null,
-        failureReqMassage: e.response.data.massage})
+      setmessage({
+        successReqmessage: null,
+        failureReqmessage: e.response.data.message})
     }
 
 
@@ -109,14 +109,14 @@ const NewPostSection = () => {
         </Form.Group>
 
 
-        {massage.failureReqMassage && (
+        {message.failureReqmessage && (
           <div className="text-danger text-center mt-3">
-            {massage.failureReqMassage}
+            {message.failureReqmessage}
           </div>
         )}
-        {massage.successReqMassage && (
+        {message.successReqmessage && (
           <div className="text-success text-center mt-3">
-            {massage.successReqMassage}
+            {message.successReqmessage}
           </div>
         )}
         <Button variant="primary" className='button3' type="submit">Publish</Button>

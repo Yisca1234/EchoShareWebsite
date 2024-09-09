@@ -7,7 +7,7 @@ const path = require('path');
 const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/post');
 const userRoutes = require('./routes/user');
-
+const commentRoutes = require('./routes/comment.js');
 const app = express();
 
 
@@ -16,8 +16,10 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 app.use('/api', authRoutes);
-app.use('/api/post', postRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/post', postRoutes);
+app.use('/api/comment', commentRoutes);
+
 
 app.use(express.static(path.resolve(__dirname, './public/')));
 app.get(/.*/, (req, res) => res.sendFile(path.resolve(__dirname, './public/index.html')));

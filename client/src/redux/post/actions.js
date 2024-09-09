@@ -8,6 +8,7 @@ import {
   UNFOLLOW_POSTS,
   CHANGE_OF_FOLLOWING,
   LOGOUT,
+  ADD_COMMENT,
 } from './actionTypes';
 import apiClient from '../../utils/apiClient.js'
 
@@ -51,6 +52,11 @@ export const follow_posts = (idChannel) => ({
 export const unfollow_posts = (idChannel) => ({
   type: UNFOLLOW_POSTS,
   payload: { idChannel },
+});
+
+export const add_comment = (idComment, postId) => ({
+  type: ADD_COMMENT,
+  payload: { idComment, postId},
 });
 
 export const change_of_following = () => ({
@@ -104,3 +110,4 @@ export const handleFollowingPosts = (idChannel, type) => async (dispatch) =>{
     await dispatch(unfollow_posts(idChannel));
   }
 }
+

@@ -18,6 +18,8 @@ export const isAvatar = (state) => state.user.user.data.avatarExists;
 
 export const getAvatar = (state) => state.user.user.avatar;
 
+export const getAvatarImage = (state) => state.user.user.avatar.imageLink;
+
 export const getFollowers = (state) => state.user.user.avatar.Followers;
 
 export const getAvatarName = (state) => state.user.user.avatar.username;

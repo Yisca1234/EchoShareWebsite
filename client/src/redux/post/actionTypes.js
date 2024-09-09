@@ -9,4 +9,5 @@ export const VIEW_SUCCESS = 'VIEW_SUCCESS';
 export const FOLLOW_POSTS = 'FOLLOW_POSTS';
 export const UNFOLLOW_POSTS = 'UNFOLLOW_POSTS';
 export const CHANGE_OF_FOLLOWING = 'CHANGE_OF_FOLLOWING';
+export const ADD_COMMENT = 'ADD_COMMENT';
 export const LOGOUT = 'LOGOUT';

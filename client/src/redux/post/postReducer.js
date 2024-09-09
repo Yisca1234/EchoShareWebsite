@@ -4,11 +4,12 @@ import {
   FAILURE_GET_POSTS,
   SUCCESS_LIKE_ADDED,
   SUCCESS_LIKE_REMOVED,
-  FOLLOW_POSTS,
   CHANGE_OF_FOLLOWING,
   UNFOLLOW_POSTS,
-  LOGOUT
+  LOGOUT,
+  ADD_COMMENT,
 } from './actionTypes';
+
 
 const initialState = {
   loaded: false,
@@ -22,7 +23,6 @@ const initialState = {
 const postReducer = (state = initialState, action) => {
   switch (action.type) {
     case SUCCESS_GET_POSTS:
-      //console.log('here');
       if(action.payload.typeOfSort==='foryou'){
         return {
           ...state,
@@ -175,6 +175,30 @@ const postReducer = (state = initialState, action) => {
           following: [],
         }
       }
+
+    case ADD_COMMENT:
+      const { idComment, postId} = action.payload;
+      const index1 = state.posts.foryou.findIndex(obj => obj._id == postId);
+      const index2 = state.posts.following.findIndex(obj => obj._id == postId);
+      const updatedArray1 = [...state.posts.foryou];
+      const updatedArray2 = [...state.posts.following];
+      if(index1>=0){
+        updatedArray1[index1].data.comments.push(idComment);
+      };
+      if(index2>=0){
+        updatedArray2[index2].data.comments.push(idComment);
+      };
+      
+      return {
+        ...state,
+        posts: {
+          foryou: updatedArray1,
+          following: updatedArray2,
+        }
+      };
+
+
+
 
     case LOGOUT:
       return initialState;

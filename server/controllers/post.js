@@ -2,7 +2,10 @@ const Post = require('../models/post');
 const User = require('../models/user');
 const mongoose = require('mongoose');
 
-
+const populateComments = async (posts) => {
+  
+  return populatedPosts;
+};
 
 const createNewPost = async (req, res) => {
   const { username, postContent, photoData } = req.body;
@@ -79,10 +82,10 @@ const getPosts = async (req, res) => {
       { $sample: { size: parseInt(limit, 10) } },
       {
         $lookup: {
-          from: 'users', // name of the user collection
-          localField: 'user', // field from the 'posts' collection
-          foreignField: '_id', // field from the 'users' collection
-          as: 'user' // field where the joined user data will be stored
+          from: 'users', 
+          localField: 'user', 
+          foreignField: '_id', 
+          as: 'user' 
         }
       }    
     ]);
@@ -106,10 +109,10 @@ const getPosts = async (req, res) => {
       { $sample: { size: parseInt(limit, 10) } },
       {
         $lookup: {
-          from: 'users', // name of the user collection
-          localField: 'user', // field from the 'posts' collection
-          foreignField: '_id', // field from the 'users' collection
-          as: 'user' // field where the joined user data will be stored
+          from: 'users', 
+          localField: 'user', 
+          foreignField: '_id', 
+          as: 'user' 
         }
       },    
     ]);

@@ -121,10 +121,10 @@ const ContentSection = () => {
         <>
           {allPosts[typeOfSortOfSection].map((post, index) => (
             <div className="post-margin postOfList" key={index}>
-            <Post
-              post={post}
-              incrementView={incrementView}
-            />
+              <Post
+                post={post}
+                incrementView={incrementView}
+              />
             </div>
           ))}
           <div className='box10' ref={ref}>preparing more posts for you...</div>
