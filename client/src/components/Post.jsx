@@ -3,15 +3,18 @@ import { Container, Row, Col, Image, Badge, Button } from 'react-bootstrap';
 import { FaThumbsUp, FaComment, FaShare, FaEye, FaBookmark,FaQuoteRight, FaInfoCircle,FaFileAlt } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import {getFollowing, getUserId, getBookmaredPosts} from '../redux/user/selectors.js';
+import { handleGetComments } from '../redux/comment/actions.js'
 import { useState, useEffect } from 'react';
 import {handleFollow, handleBookmark} from '../redux/user/actions.js'
 import {handlePostLike} from '../redux/post/actions.js'
 import {formatPostDate} from '../utils/formatPostDate.js';
 import { useInView } from 'react-intersection-observer';
-
+import CommentSection from './CommentSection.jsx'
+import {postComments} from '../redux/comment/selectors.js'
 
 const Post = ({ post, incrementView }) => {
   const [isFollow, setIsFollow] = useState(false);
+  const [numOfComments, setNumOfComments] = useState('');
   const [isActive, setIsActive] = useState({
     likeButton: false,
     commentButton: false,
@@ -19,7 +22,7 @@ const Post = ({ post, incrementView }) => {
     bookmarkButton: false,
     informationButton: false,
   });
-  const [loading, setLoading] = useState(new Array(3).fill(false));
+  const [loading, setLoading] = useState(new Array(4).fill(false));
   const { ref, inView } = useInView({
     threshold: 0.1,
     triggerOnce: true,
@@ -31,8 +34,9 @@ const Post = ({ post, incrementView }) => {
   } else {
     user = post.user;
   }
- 
+  
   const postId = post._id;
+  const commentsOfPost = useSelector(postComments(postId)) || null;
   const listFollowing = useSelector(getFollowing);
   const postDate = formatPostDate(createdAt);
   const {_id} = user;
@@ -58,6 +62,14 @@ const Post = ({ post, incrementView }) => {
     }
   }, [inView]);
 
+  useEffect(() => {
+    if (comments.length<commentsOfPost?.length) {
+      setNumOfComments(commentsOfPost.length);
+    } else {
+      setNumOfComments(comments.length);
+    }
+  }, [commentsOfPost]);
+
   const cloud_name = "dojexlq8y"
   const {text, img, likes, comments, qoutes, views} = data;
   //console.log(likes);
@@ -67,15 +79,9 @@ const Post = ({ post, incrementView }) => {
     imgLinkPost = `https://res.cloudinary.com/${cloud_name}/image/upload/${img.imageLink}`
   }
   const {username, imageLink}= avatar;
-  let profileImage;
+  const profileImage = imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}` : 'account.png';
   const idFollower = useSelector(getUserId);
   const isLiked = likes.includes(idFollower);
-  if(imageLink){
-    profileImage= `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}`;
-  }
-  else{
-    profileImage= 'account.png';
-  }
 
   const handleFollowButton = async (idChannel) => {
     handleLoading(true, 0);
@@ -89,24 +95,17 @@ const Post = ({ post, incrementView }) => {
     switch (nameOfButton) {
       case 'likeButton': {
         handleLoading(true, 1);
-        // console.log(postId, idFollower, !conditionOfButton);
         await dispatch(handlePostLike(postId, idFollower, !conditionOfButton));
         handleLoading(false, 1);
-        break;
-      }
-      case 'commentButton': {
-        console.log('commentButton');
         break;
       }
       case 'bookmarkButton': {
         handleLoading(true, 2);
         await dispatch(handleBookmark(idFollower, postId, isBookmarked, _id));
         handleLoading(false, 2);
-        console.log('bookmarkButton');
         break;
       }
       case 'informationButton': {
-        console.log('informationButton');
         break;
       }
       default: {
@@ -114,11 +113,20 @@ const Post = ({ post, incrementView }) => {
         break;
       }
     }
+  };
+
+  const changeStateFunction = async (sort) => {
+    const state = isActive.commentButton;
     setIsActive(prevState => ({
       ...prevState,
-      [nameOfButton]: !conditionOfButton,
+      [sort]: !prevState[sort],  
     }));
-  };
+    if(!state && !commentsOfPost){
+      handleLoading(true, 3);
+      await dispatch(handleGetComments(postId));
+      handleLoading(false,3);
+    }
+  }
 
   const handleLoading = (state, index) => {
     setLoading((pre) => {
@@ -148,7 +156,7 @@ const Post = ({ post, incrementView }) => {
 
       <Row className="mt-2">
         <Col>
-          <p>{text}</p>
+          <p className='text7'>{text}</p>
         </Col>
       </Row>
 
@@ -162,8 +170,8 @@ const Post = ({ post, incrementView }) => {
         <Col className={`pointer ${isLiked && 'active1'} ${loading[1] && 'loading1'}`} disabled={loading[1]} onClick={()=>{handlePostButtons('likeButton',isLiked)}}>
           <FaThumbsUp /> {likes.length}
         </Col>
-        <Col>
-          <FaComment /> {comments.length}
+        <Col className={`pointer ${loading[3] ? 'loading1' : isActive.commentButton && 'active4'}`} onClick={()=>{changeStateFunction('commentButton')}}>
+          <FaComment /> {numOfComments}
         </Col>
         <Col>
           <FaQuoteRight /> {qoutes.length}
@@ -178,6 +186,9 @@ const Post = ({ post, incrementView }) => {
           <FaFileAlt /> 
         </Col>
       </Row>
+      {isActive.commentButton && (
+        <CommentSection postId={postId} />
+      )}
     </Container>
   );
 }

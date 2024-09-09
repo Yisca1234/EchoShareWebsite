@@ -221,6 +221,13 @@ Button:hover {
   color: gray;
   font-size: 13px;
 }
+.text7{
+  white-space: pre-wrap;
+}
+.text8{
+  text-align: center;
+  font-weight: 300;
+}
 
 .text2:hover {
   text-decoration: underline;
@@ -240,6 +247,9 @@ Button:hover {
 }
 .active3{
   color: #FFC107;
+}
+.active4{
+  color: green;
 }
 .loading1{
   color: gray;

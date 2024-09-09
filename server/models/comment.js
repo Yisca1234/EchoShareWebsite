@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const user = require('./user');
 const post = require('./post');
-
 const { type } = require('os');
 
 const commentSchema = new mongoose.Schema(

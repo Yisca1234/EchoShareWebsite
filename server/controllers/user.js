@@ -239,7 +239,7 @@ const handleBookmark = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try{
-    const post = await Post.findById(postId).populate('user');
+    const post = await Post.findById(postId).populate('user', '_id avatar');
     if(isBookmarked){
       await post.decrementBookmark();
       const updatedChannelUser = await User.findOneAndUpdate(

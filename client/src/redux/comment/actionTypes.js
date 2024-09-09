@@ -1,0 +1,4 @@
+export const GET_COMMENTS = 'GET_COMMENTS';
+export const SUCCESS_CREATE_COMMENT = 'SUCCESS_CREATE_COMMENT';
+
+export const LOGOUT = 'LOGOUT';
