@@ -48,7 +48,7 @@ const NewPostSection = () => {
     e.preventDefault();
     if(selectedImage){
       const signatureResponse = await apiClient.get('/get-signature');
-      const data = new FormData()
+      const data = new FormData();
       data.append("file", selectedImage)
       data.append("api_key", api_key)
       data.append("signature", signatureResponse.data.signature)
