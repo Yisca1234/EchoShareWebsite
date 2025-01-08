@@ -1,0 +1,47 @@
+/* MobileScreen.css */
+
+.mobile-screen-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f4f4;
+  text-align: center;
+  padding: 20px;
+}
+
+.logo {
+  margin-bottom: 30px;
+}
+
+.logo-image {
+  max-width: 200px;
+  width: 100%;
+  height: auto;
+}
+
+.message h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 15px;
+}
+
+.message-text {
+  font-size: 1.2rem;
+  color: #666;
+  line-height: 1.5;
+  max-width: 500px;
+  margin: 0 auto;
+  font-weight: 500;
+}
+
+@media (max-width: 600px) {
+  .message h1 {
+    font-size: 1.5rem;
+  }
+
+  .message-text {
+    font-size: 1rem;
+  }
+}

@@ -9,6 +9,8 @@ import SubChannelsPage from './components/SubChannelsPage.jsx'
 import FollowersPage from './components/FollowersPage.jsx'
 import NotFound from './components/NotFound.jsx'
 import Modal from './components/Modal.jsx'
+import MobileScreen from './components/MobileScreen.jsx'
+import { isMobile } from 'react-device-detect'; 
 import { useState, useEffect, useRef } from 'react'
 import { change_of_following } from './redux/post/actions.js'
 import { useSelector, useDispatch } from 'react-redux';
@@ -56,7 +58,7 @@ const AppRoutes = () => {
       {showModal ? 
         <Modal onClose={handleCloseModal}/> :
         <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/" element={isMobile ? <Navigate to="/mobile-screen" /> : <Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/home" element={<Home />} />
@@ -65,6 +67,7 @@ const AppRoutes = () => {
           <Route path="/bookmarkedPosts" element={<BookmarkedPostsPage />}/>
           <Route path="/subscribedChannelsList" element={<SubChannelsPage />} />
           <Route path="/followersList" element={<FollowersPage />} />
+          <Route path="/mobile-screen" element={<MobileScreen />} />
           <Route path="*" element={<NotFound />} /> 
         </Routes>
       }

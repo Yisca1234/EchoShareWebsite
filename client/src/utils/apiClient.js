@@ -2,9 +2,12 @@ import axios from 'axios';
 
 
 const apiClient = axios.create({
-  // baseURL: 'https://app.echo-share.click/api', 
-  baseURL: '/api', 
+  baseURL: process.env.NODE_ENV === 'development' 
+    ? 'http://localhost:5000/api'  // Use server's port 5000 in development
+    : 'https://app.echo-share.click/api',  // Use the production API URL
 });
+
+
 
 
 apiClient.interceptors.request.use(
