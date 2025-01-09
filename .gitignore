@@ -4,4 +4,5 @@ client/node_modules
 
 server/node_modules
 *.env
-upload_prod
+/upload_prod
+server/public

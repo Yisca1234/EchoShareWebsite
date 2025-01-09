@@ -2,12 +2,12 @@ const { execSync } = require('child_process');
 
 try {
     // Run npm run build in the client directory
-    console.log('Building client...');
-    execSync('cd ./client && npm run build1', { stdio: 'inherit' });
+//     console.log('Building client...');
+//     execSync('cd ./client && npm run build1', { stdio: 'inherit' });
 
-   // Move back to the root directory
-   console.log('Moving back to the root directory...');
-   execSync('cd ..', { stdio: 'inherit' });
+//    // Move back to the root directory
+//    console.log('Moving back to the root directory...');
+//    execSync('cd ..', { stdio: 'inherit' });
 
    // Add changes to Git
    console.log('Staging changes...');
