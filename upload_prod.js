@@ -15,7 +15,7 @@ try {
 
    // Commit changes to Git
    console.log('Committing changes...');
-   execSync('git commit -m "draft1.4"', { stdio: 'inherit' });
+   execSync('git commit -m "draft1.5"', { stdio: 'inherit' });
 
    // Push changes to the repository
    console.log('Pushing changes to the repository...');
