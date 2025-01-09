@@ -6,8 +6,7 @@ server/node_modules
 *.env
 /upload_prod
 server/public/account.png
-server/public/assets/varela-round-latin-400-P7AAbQHO.woff2
-server/public/assets/varela-round-latin-400-WXR39kgP.woff
+server/public/assets
 server/public/echoShare.png
 server/public/echoShareBlack.png
 server/public/index.html
