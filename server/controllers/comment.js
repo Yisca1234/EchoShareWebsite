@@ -37,10 +37,11 @@ const createNewComment = async (req, res) => {
     
     await session.commitTransaction();
     session.endSession();
-
+    const populatedComment = await Comment.findById(comment._id)
+      .populate('user', '_id avatar');
 
     res.status(200).json({
-      comment,
+      comment: populatedComment,
     });
   } catch (error) {
     await session.abortTransaction();

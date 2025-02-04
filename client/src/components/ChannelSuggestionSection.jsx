@@ -5,6 +5,7 @@ import { getUserId, getFollowing} from '../redux/user/selectors.js';
 import {handleFollow} from '../redux/user/actions.js'
 import {getChannels} from '../redux/channel/actions.js';
 import {popularChannels, randomChannels} from '../redux/channel/selectors.js';
+import { useNavigate } from 'react-router-dom';
 
 
 const ChannelSuggestionSection = () => {
@@ -17,6 +18,7 @@ const ChannelSuggestionSection = () => {
   const idListOfChannels = [...popularChannelsList.map(obj => obj._id), ...randomChannelsList.map(obj => obj._id)];
   const isFollowing = idListOfChannels.filter(element => listFollowing.includes(element)? element : false);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const cloud_name = "dojexlq8y";
   const handleFollowButton = async (idChannel, index) => {
     handleLoading(true, index);
@@ -63,6 +65,10 @@ const ChannelSuggestionSection = () => {
     });
   }
 
+  const navigateToChannel = (id) => {
+    navigate(`/channel/${id}`);
+  }
+
   // to do: when the mouse is one a certain channel it will show card with more details about the channel
 
   return (
@@ -75,7 +81,7 @@ const ChannelSuggestionSection = () => {
       {popularChannelsList.map((channel, index) => (
         <Row className="align-items-center mt-2 line" key={index}>
           <Col xs={2}>
-            <Image src={channel.avatar.imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${channel.avatar.imageLink}` : 'account.png'} style={{borderRadius: '50%', width: '55px', height: '55px', objectFit: 'cover' }} />
+            <Image src={channel.avatar.imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${channel.avatar.imageLink}` : '../public/account.png'} style={{borderRadius: '50%', width: '55px', height: '55px', objectFit: 'cover', cursor: 'pointer' }} onClick={()=>{navigateToChannel(channel._id)}}/>
           </Col>
           <Col xs={7}>
             <strong className='someText'>{channel.avatar.username}</strong> {/* Channel name in bold */}
@@ -94,7 +100,7 @@ const ChannelSuggestionSection = () => {
       {randomChannelsList.map((channel, index) => (
         <Row className="align-items-center mt-2 line" key={index}>
           <Col xs={2}>
-            <Image src={channel.avatar.imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${channel.avatar.imageLink}` : 'account.png'} style={{borderRadius: '50%', width: '55px', height: '55px', objectFit: 'cover' }} />
+            <Image src={channel.avatar.imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${channel.avatar.imageLink}` : '../public/account.png'} style={{borderRadius: '50%', width: '55px', height: '55px', objectFit: 'cover', cursor: 'pointer' }} onClick={()=>{navigateToChannel(channel._id)}}/>
           </Col>
           <Col xs={7}>
             <strong className='someText'>{channel.avatar.username}</strong> {/* Channel name in bold */}

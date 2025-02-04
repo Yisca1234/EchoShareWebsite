@@ -192,8 +192,7 @@ const getChannelsHome = async (req, res) => {
       {
         $match: {
           'data.avatarExists': true,
-          _id: { $ne: new mongoose.Types.ObjectId(userId) },
-          _id: { $nin: followingList },
+          _id: { $nin: [new mongoose.Types.ObjectId(userId), ...followingList] }
         },
       },
       {
@@ -212,8 +211,7 @@ const getChannelsHome = async (req, res) => {
       {
         $match: {
           'data.avatarExists': true,
-          _id: { $ne: new mongoose.Types.ObjectId(userId) },
-          _id: { $nin: [...randomTopUsers.map((obj => obj._id)), ...followingList] },
+          _id: { $nin: [new mongoose.Types.ObjectId(userId), ...followingList] }
         }
       },
       { $sample: { size: 4 } },
@@ -270,7 +268,24 @@ const handleBookmark = async (req, res) => {
 
 }
 
+const getSearchResults = async (req, res) => {
+  const { userId, query } = req.params;
+  console.log(query);
+  try {
+    const channels = await User.find({
+      'avatar.username': { $regex: new RegExp(query, 'i') },
+      _id: { $ne: userId }, // Exclude the specific _id
+    })
+      .select('_id avatar.username avatar.imageLink')
+      .exec();    
+    res.status(200).json({ channels });
+  } catch (error) {
+    res.status(500).json({ error });
+  }
+  
+};
 
-module.exports = { getUser, createUser ,handleAvatar,handleFollow, getChannelsHome, handleBookmark};
+
+module.exports = { getUser, createUser ,handleAvatar,handleFollow, getChannelsHome, handleBookmark, getSearchResults};
 
 

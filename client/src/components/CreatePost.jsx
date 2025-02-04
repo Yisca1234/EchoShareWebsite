@@ -15,7 +15,7 @@ const CreatePostPage = () => {
   useEffect(() => {
 
     if(!authenticated){
-      navigate('/login');
+      navigate('/');
     }
     
   }, [authenticated]);

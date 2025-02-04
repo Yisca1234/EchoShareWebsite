@@ -19,16 +19,17 @@ const BookmarkedPostsPage = () => {
   useEffect(() => {
 
     if(!authenticated){
-      navigate('/login');
+      navigate('/');
     }
     
   }, [authenticated]);
   return(
     <div className='row-container1 no-scroll'>
       < Sidebar/>
-      <Container fluid className='main-section2'>
+      {authenticated &&
+      (<Container fluid className='main-section2'>
         <BookmarkBar />
-      </Container>
+      </Container>)}
     </div>
   )
 };

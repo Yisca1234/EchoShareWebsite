@@ -5,16 +5,17 @@ import { isAuthenticated  } from '../redux/auth/selectors';
 import { useEffect, useState } from 'react'
 import ChannelsSection from './ChannelsSection.jsx'
 import { Container, Row, Col, Image, Button } from 'react-bootstrap';
-
+import { useParams } from 'react-router-dom';
 
 const FollowersPage = () => {
   const authenticated = useSelector(isAuthenticated);
+  const { id } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
 
     if(!authenticated){
-      navigate('/login');
+      navigate('/');
     }
     
   }, [authenticated]);
@@ -22,9 +23,10 @@ const FollowersPage = () => {
   return(
     <div className='row-container1 no-scroll box7 '>
       <Sidebar />
-      <Container fluid >
-        <ChannelsSection typeOfDisplay={2}/>
-      </Container>
+      { authenticated &&
+      (<Container fluid >
+        <ChannelsSection typeOfDisplay={2} id={ id ? id : null}/>
+      </Container>)}
     </div>
   )
 };

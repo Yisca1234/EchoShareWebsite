@@ -11,8 +11,9 @@ import {formatPostDate} from '../utils/formatPostDate.js';
 import { useInView } from 'react-intersection-observer';
 import CommentSection from './CommentSection.jsx'
 import {postComments} from '../redux/comment/selectors.js'
+import { useNavigate } from 'react-router-dom';
 
-const Post = ({ post, incrementView }) => {
+const Post = ({ post, incrementView, isChannelpage }) => {
   const [isFollow, setIsFollow] = useState(false);
   const [numOfComments, setNumOfComments] = useState('');
   const [isActive, setIsActive] = useState({
@@ -28,18 +29,15 @@ const Post = ({ post, incrementView }) => {
     triggerOnce: true,
   });
   const { data, createdAt } = post;
-  let user;
-  if(post.user[0]){
-    user = post.user[0];
-  } else {
-    user = post.user;
-  }
+  const navigate = useNavigate();
+  const user = post?.user?.[0] ? post.user[0] : post?.user ? post.user : null;
   
   const postId = post._id;
   const commentsOfPost = useSelector(postComments(postId)) || null;
   const listFollowing = useSelector(getFollowing);
   const postDate = formatPostDate(createdAt);
-  const {_id} = user;
+  // const {_id} = user;
+  const _id = user ? user._id : post.idChannel;
   const dispatch = useDispatch();
   const bookmarkedListOfUser = useSelector(getBookmaredPosts);
   const idOfBookmarked = bookmarkedListOfUser.map((obj => obj._id));
@@ -73,13 +71,17 @@ const Post = ({ post, incrementView }) => {
   const cloud_name = "dojexlq8y"
   const {text, img, likes, comments, qoutes, views} = data;
   //console.log(likes);
-  const {avatar} = user;
+  let profileImage, username, imageLink, avatar;
+  if( user !== null){
+    avatar = user.avatar;
+    username = user.username;
+    imageLink = avatar.imageLink;
+    profileImage = imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}` : '../public/account.png';
+  }
   let imgLinkPost;
   if(img.exists){
     imgLinkPost = `https://res.cloudinary.com/${cloud_name}/image/upload/${img.imageLink}`
   }
-  const {username, imageLink}= avatar;
-  const profileImage = imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}` : 'account.png';
   const idFollower = useSelector(getUserId);
   const isLiked = likes.includes(idFollower);
 
@@ -96,6 +98,13 @@ const Post = ({ post, incrementView }) => {
       case 'likeButton': {
         handleLoading(true, 1);
         await dispatch(handlePostLike(postId, idFollower, !conditionOfButton));
+        if(isChannelpage){
+          if(isLiked){
+            likes.splice(likes.indexOf(idFollower), 1);
+          } else {
+            likes.push(idFollower);
+          }
+        }
         handleLoading(false, 1);
         break;
       }
@@ -137,23 +146,30 @@ const Post = ({ post, incrementView }) => {
     });
   }
 
+  const navigateToChannel = () => {
+    navigate(`/channel/${_id}`);
+  }
+
 
 
   return (
 
     <Container ref={ref} className="mt-4 border p-3">
-      <div >
-        <div xs={2} className='con'>
-          <Image src={profileImage} fluid  style={{borderRadius: '50%', width: '35px', height: '35px', objectFit: 'cover' }}/>
+      { isChannelpage ? (
+        <div>{postDate}</div>
+      ) : (
+        <div >
+          <div xs={2} className='con pointer' >
+            <Image src={profileImage} onClick={navigateToChannel} fluid  style={{borderRadius: '50%', width: '35px', height: '35px', objectFit: 'cover' }}/>
+          </div>
+          <div xs={10} className="text-muted con"  >
+            <strong>{username}</strong> &middot; {postDate}
+          </div>
+          <Col xs={3} className='con' >
+            <Button variant="primary" size="sm" disabled={loading[0]} className={` ${loading[0] && 'loading1'}`} onClick={()=>{handleFollowButton(_id)}}>{isFollow ? 'UnFollow' : 'Follow'}</Button> 
+          </Col>
         </div>
-        <div xs={10} className="text-muted con"  >
-          <strong>{username}</strong> &middot; {postDate}
-        </div>
-        <Col xs={3} className='con' >
-          <Button variant="primary" size="sm" disabled={loading[0]} className={` ${loading[0] && 'loading1'}`} onClick={()=>{handleFollowButton(_id)}}>{isFollow ? 'UnFollow' : 'Follow'}</Button> 
-        </Col>
-      </div>
-
+      )}
       <Row className="mt-2">
         <Col>
           <p className='text7'>{text}</p>

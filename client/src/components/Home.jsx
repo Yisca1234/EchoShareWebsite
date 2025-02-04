@@ -5,8 +5,8 @@ import ChannelSuggestionSection from './ChannelSuggestionSection.jsx'
 import { useEffect, useState } from 'react'
 import { userRequest } from '../redux/user/actions.js';
 import { useDispatch, useSelector } from 'react-redux';
-import { getUserEmail  } from '../redux/auth/selectors';
-import { getUserId } from '../redux/user/selectors';
+// import { getUserEmail  } from '../redux/auth/selectors';
+// import { getUserId } from '../redux/user/selectors';
 import axios from 'axios'
 import { getAllPosts } from '../redux/post/actions.js';
 import { Link, useNavigate } from 'react-router-dom';
@@ -23,13 +23,13 @@ const Home = () => {
   
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const useremail = useSelector(getUserEmail);
+  // const useremail = useSelector(getUserEmail);
   const authenticated = useSelector(isAuthenticated);
-  const userId = useSelector(getUserId);
+  // const userId = useSelector(getUserId);
   useEffect(() => {
 
     if(!authenticated){
-      navigate('/login');
+      navigate('/');
     }
     
   }, [authenticated]);
@@ -38,13 +38,25 @@ const Home = () => {
 
   return(
     <div className='row-container no-horizontal-scroll'>
-      
-      < Sidebar/>
-      < ContentSection />
-      <div className='column-container' style={{display: 'inline-block',width: '37%' , position: 'fixed', top: '0', right: '0', marginRight: '10px'}}>
-        < Search />
-        < ChannelSuggestionSection />
-      </div>
+      <Sidebar />
+      {authenticated && ContentSection()}
+      {authenticated && (
+        <div className='column-container' style={{ display: 'inline-block', width: '37%', position: 'fixed', top: '0', right: '0', marginRight: '10px' }}>
+          <Search />
+          <ChannelSuggestionSection />
+        </div>
+      )}
+      {/* { authenticated && (
+        <div>
+          < Sidebar/>
+          < ContentSection />
+          <div className='column-container' style={{display: 'inline-block',width: '37%' , position: 'fixed', top: '0', right: '0', marginRight: '10px'}}>
+            < Search />
+            < ChannelSuggestionSection />
+          </div>
+
+        </div>
+      )} */}
     </div>
   )
 };

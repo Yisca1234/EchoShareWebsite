@@ -4,6 +4,7 @@ import {handleFollow} from '../redux/user/actions.js'
 import {getUserId, getFollowing } from '../redux/user/selectors';
 import { useSelector,useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 
 const Channel = (channel) => {
   const [isFollow, setIsFollow] = useState(false);
@@ -13,11 +14,12 @@ const Channel = (channel) => {
   const dispatch = useDispatch();
   const cloud_name = "dojexlq8y";
   const {avatar, _id} = channel;
-  const {username, imageLink, description} = avatar;
+  const {username, imageLink} = avatar;
   const namOfFollowers = avatar.Followers.length;
   const numOfPosts = avatar.posts.length;
-  const profileImage = imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}` : 'account.png';
+  const profileImage = imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}` : '../public/account.png';
   const userId = useSelector(getUserId);
+  const navigate = useNavigate();
 
 
 
@@ -44,13 +46,17 @@ const Channel = (channel) => {
   const handleLoading = (state) => {
     setLoading(state);
   }
+
+  const navigateToChannel = () => {
+    navigate(`/channel/${_id}`);
+  }
   return (
 
     <Container className="mt-4 border p-3 ">
       <div className='row-container'>
         <Container>
           <div xs={2} className='con'>
-            <Image src={profileImage} fluid  style={{borderRadius: '50%', width: '35px', height: '35px', objectFit: 'cover' }}/>
+            <Image src={profileImage} fluid  style={{borderRadius: '50%', width: '35px', height: '35px', objectFit: 'cover', cursor: 'pointer' }} onClick={navigateToChannel}/>
           </div>
           <div xs={10} className="text-muted con"  >
             {username}

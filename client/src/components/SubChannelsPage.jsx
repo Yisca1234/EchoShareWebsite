@@ -15,7 +15,7 @@ const SubChannelsPage = () => {
   useEffect(() => {
 
     if(!authenticated){
-      navigate('/login');
+      navigate('/');
     }
     
   }, [authenticated]);
@@ -23,9 +23,10 @@ const SubChannelsPage = () => {
   return(
     <div className='row-container1 no-scroll box7 '>
       <Sidebar />
-      <Container fluid >
-        <ChannelsSection typeOfDisplay={1}/>
-      </Container>
+      { authenticated &&
+      (<Container fluid >
+        <ChannelsSection typeOfDisplay={1} id={null}/>
+      </Container>)}
     </div>
   )
 };

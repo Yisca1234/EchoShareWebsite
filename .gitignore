@@ -3,8 +3,8 @@ client/node_modules
 
 
 server/node_modules
-*.env
 /upload_prod
+*.env
 server/public/account.png
 server/public/assets
 server/public/echoShare.png

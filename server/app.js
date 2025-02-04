@@ -8,6 +8,8 @@ const authRoutes = require('./routes/auth');
 const postRoutes = require('./routes/post');
 const userRoutes = require('./routes/user');
 const commentRoutes = require('./routes/comment.js');
+const channelRoutes = require('./routes/channel.js');
+
 const app = express();
 
 if (process.env.NODE_ENV === 'development') {
@@ -20,6 +22,7 @@ app.use('/api', authRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/post', postRoutes);
 app.use('/api/comment', commentRoutes);
+app.use('/api/channel', channelRoutes);
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.resolve(__dirname, './public/')));

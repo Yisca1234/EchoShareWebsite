@@ -1,6 +1,12 @@
-
-.search{
-  display: inline-block;
+.search {
+  padding: 0.75rem;
   width: 100%;
-  margin-top: 10px;
-}
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  outline: none;
+  margin-top: 2px;
+ }
+ 
+ .search:focus {
+  box-shadow: 0 0 0 2px rgb(59, 130, 246);
+ }

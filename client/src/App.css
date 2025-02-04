@@ -1,4 +1,4 @@
-Button:hover {
+Button {
   cursor: pointer;
 }
 
@@ -108,6 +108,22 @@ Button:hover {
   background-color: gray;
 }
 
+.line2 {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: green;
+}
+
+.line3 {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: whitesmoke;
+  cursor: pointer;
+  border-bottom: 2px solid black;
+}
+
 .setting-icon {
   font-size: 30px;
 }
@@ -142,8 +158,20 @@ Button:hover {
   padding: 40px;
 }
 
+.section3{
+  padding: 40px;
+  border: 2px solid gold;
+}
+
 .container2{
   border: 2px solid blueviolet;
+}
+
+.button1{
+  /* height: auto; */
+  margin: 20px 15px;
+  padding: 5px;
+  border-radius: 5px;
 }
 
 .button3{
@@ -184,6 +212,17 @@ Button:hover {
 .box11{
   width: 60px;
   text-align: center;
+}
+
+.box12{
+  border: 2px solid red;
+}
+.box13{
+  height: 85vh;
+}
+
+.box14{
+  border: 2px solid green;
 }
 .container4 {
   text-align: center;

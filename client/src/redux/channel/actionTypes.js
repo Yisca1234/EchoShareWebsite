@@ -1,2 +1,4 @@
 export const SUCCESS_CHANNELS = 'SUCCESS_CHANNELS';
+export const GET_CHANNEL = 'GET_CHANNEL';
+export const SUCCESS_GET_CHANNEL = 'SUCCESS_GET_CHANNEL';
 export const LOGOUT = 'LOGOUT';

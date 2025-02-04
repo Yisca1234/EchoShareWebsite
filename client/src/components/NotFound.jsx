@@ -7,7 +7,7 @@ import { Button } from 'react-bootstrap';
 const NotFound = () => {
   const navigate = useNavigate();
   const handleMovingToLogin = () => {
-    navigate('/login');
+    navigate('/');
   }
   return(
     <div className="not-found-container">

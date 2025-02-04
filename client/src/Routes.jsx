@@ -10,6 +10,7 @@ import FollowersPage from './components/FollowersPage.jsx'
 import NotFound from './components/NotFound.jsx'
 import Modal from './components/Modal.jsx'
 import MobileScreen from './components/MobileScreen.jsx'
+import ChannelPage from './components/ChannelPage.jsx'
 import { isMobile } from 'react-device-detect'; 
 import { useState, useEffect, useRef } from 'react'
 import { change_of_following } from './redux/post/actions.js'
@@ -66,7 +67,8 @@ const AppRoutes = () => {
           <Route path="/createNewPost" element={<CreatePostPage />} />
           <Route path="/bookmarkedPosts" element={<BookmarkedPostsPage />}/>
           <Route path="/subscribedChannelsList" element={<SubChannelsPage />} />
-          <Route path="/followersList" element={<FollowersPage />} />
+          <Route path="/followersList/:id?" element={<FollowersPage />} />
+          <Route path="/channel/:id" element={<ChannelPage />} />
           <Route path="/mobile-screen" element={<MobileScreen />} />
           <Route path="*" element={<NotFound />} /> 
         </Routes>

@@ -17,7 +17,7 @@ const CommentSection = ({postId}) => {
   const username = useSelector(getAvatarName);
   const commentsList = useSelector(postComments(postId)) || [];
   const cloud_name = "dojexlq8y";
-  const profileImage = avatarImage ? `https://res.cloudinary.com/${cloud_name}/image/upload/${avatarImage}` : 'account.png';
+  const profileImage = avatarImage ? `https://res.cloudinary.com/${cloud_name}/image/upload/${avatarImage}` : '../public/account.png';
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
