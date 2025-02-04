@@ -76,7 +76,7 @@ const Post = ({ post, incrementView, isChannelpage }) => {
     avatar = user.avatar;
     username = user.username;
     imageLink = avatar.imageLink;
-    profileImage = imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}` : '../public/account.png';
+    profileImage = imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}` : 'account.png';
   }
   let imgLinkPost;
   if(img.exists){

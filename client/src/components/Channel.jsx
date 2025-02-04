@@ -17,7 +17,7 @@ const Channel = (channel) => {
   const {username, imageLink} = avatar;
   const namOfFollowers = avatar.Followers.length;
   const numOfPosts = avatar.posts.length;
-  const profileImage = imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}` : '../public/account.png';
+  const profileImage = imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}` : 'account.png';
   const userId = useSelector(getUserId);
   const navigate = useNavigate();
 

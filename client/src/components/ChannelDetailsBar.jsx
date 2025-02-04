@@ -27,8 +27,8 @@ const ChannelDetailsBar = () => {
       setImageSrc(`https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}`);
       setImageSrc2(`https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}`);
     } else {
-      setImageSrc('../public/account.png');
-      setImageSrc2('../public/account.png');
+      setImageSrc('account.png');
+      setImageSrc2('account.png');
     }
   }, [imageLink]);
 

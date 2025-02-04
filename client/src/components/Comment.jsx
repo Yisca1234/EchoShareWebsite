@@ -8,7 +8,7 @@ const Comment = ({ _id, data, post, user, createdAt }) => {
   const imageLink = user?.avatar?.imageLink;
   const channelName = user?.avatar?.username;
   const cloud_name = "dojexlq8y";
-  const profileImage = imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}` : '../public/account.png';
+  const profileImage = imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}` : 'account.png';
   const commentDate = formatPostDate(createdAt);
 
   return (
