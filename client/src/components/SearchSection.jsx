@@ -42,7 +42,7 @@ const SearchBox = ({ channels }) => {
         {filteredChannels.length > 0 ? (
           filteredChannels.map(channel => (
             <div key={channel._id} className="p-2 border-b line3" onClick={()=>{navigateToChannel(channel._id)}}>
-              <Image src={channel.avatar.imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${channel.avatar.imageLink}` : 'account.png'} fluid style={{borderRadius: '50%', width: '35px', height: '35px', objectFit: 'cover' }} />
+              <Image src={channel.avatar.imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${channel.avatar.imageLink}` : '/account.png'} fluid style={{borderRadius: '50%', width: '35px', height: '35px', objectFit: 'cover' }} />
               <div >{channel.avatar.username}</div>
             </div>
           ))

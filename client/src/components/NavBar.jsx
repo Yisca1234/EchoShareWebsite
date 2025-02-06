@@ -40,7 +40,7 @@ const Sidebar = () => {
     <Navbar className="sidebar d-flex flex-column justify-content-between">
       <Nav className="flex-column">
         <Navbar.Brand>
-          <Image src="../public/echoShare.png" fluid roundedCircle className='brand' />
+          <Image src="/echoShare.png" fluid roundedCircle className='brand' />
         </Navbar.Brand>
         <Nav.Link as={Link} to="/home" className="mt-3">
           <div className='box11'>
@@ -79,7 +79,7 @@ const Sidebar = () => {
           placement="top"
           overlay={popover}
         >
-          <Image src="../public/account.png" roundedCircle fluid className='logout' />
+          <Image src="/account.png" roundedCircle fluid className='logout' />
         </OverlayTrigger>
       </div>
     </Navbar>

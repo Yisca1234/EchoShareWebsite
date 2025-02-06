@@ -81,7 +81,7 @@ const ChannelSuggestionSection = () => {
       {popularChannelsList.map((channel, index) => (
         <Row className="align-items-center mt-2 line" key={index}>
           <Col xs={2}>
-            <Image src={channel.avatar.imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${channel.avatar.imageLink}` : 'account.png'} style={{borderRadius: '50%', width: '55px', height: '55px', objectFit: 'cover', cursor: 'pointer' }} onClick={()=>{navigateToChannel(channel._id)}}/>
+            <Image src={channel.avatar.imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${channel.avatar.imageLink}` : '/account.png'} style={{borderRadius: '50%', width: '55px', height: '55px', objectFit: 'cover', cursor: 'pointer' }} onClick={()=>{navigateToChannel(channel._id)}}/>
           </Col>
           <Col xs={7}>
             <strong className='someText'>{channel.avatar.username}</strong> {/* Channel name in bold */}
@@ -100,7 +100,7 @@ const ChannelSuggestionSection = () => {
       {randomChannelsList.map((channel, index) => (
         <Row className="align-items-center mt-2 line" key={index}>
           <Col xs={2}>
-            <Image src={channel.avatar.imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${channel.avatar.imageLink}` : 'account.png'} style={{borderRadius: '50%', width: '55px', height: '55px', objectFit: 'cover', cursor: 'pointer' }} onClick={()=>{navigateToChannel(channel._id)}}/>
+            <Image src={channel.avatar.imageLink ? `https://res.cloudinary.com/${cloud_name}/image/upload/${channel.avatar.imageLink}` : '/account.png'} style={{borderRadius: '50%', width: '55px', height: '55px', objectFit: 'cover', cursor: 'pointer' }} onClick={()=>{navigateToChannel(channel._id)}}/>
           </Col>
           <Col xs={7}>
             <strong className='someText'>{channel.avatar.username}</strong> {/* Channel name in bold */}

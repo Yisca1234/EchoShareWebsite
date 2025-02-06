@@ -25,7 +25,7 @@ const ChannelView = ({id}) => {
     if (imageLink) {
       setImageSrc(`https://res.cloudinary.com/${cloud_name}/image/upload/${imageLink}`);
     } else {
-      setImageSrc('account.png');
+      setImageSrc('/account.png');
     }
   }, [imageLink]);
 
