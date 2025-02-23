@@ -6,6 +6,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getUserId, getFollowing } from '../redux/user/selectors';
 import {handleFollow} from '../redux/user/actions.js'
+import { FaComments } from 'react-icons/fa';
 
 
 const ChannelView = ({id}) => {
@@ -41,6 +42,10 @@ const ChannelView = ({id}) => {
     handleLoading(false);
   };
 
+  const handleChatClick = () => {
+    navigate(`/chat?channelId=${id}`);
+  };
+
   useEffect(() => {
     const checkIfFollowing = () => {
       const isFollowed = listFollowing.some(user => user._id === id);
@@ -60,7 +65,19 @@ const ChannelView = ({id}) => {
     <div children='box12'>
       <div className="line2">
         <Image src={imageSrc} roundedCircle className="channel-image" />
-        <Button variant="primary" size="sm" disabled={loading} className={`button1 ${loading && 'loading1'}`} onClick={handleFollowButton}>{isFollow ? 'UnFollow' : 'Follow'}</Button>
+        <div className="d-flex gap-2">
+          <Button variant="primary" size="sm" disabled={loading} className={`button1 ${loading && 'loading1'}`} onClick={handleFollowButton}>
+            {isFollow ? 'UnFollow' : 'Follow'}
+          </Button>
+          <Button 
+            variant="outline-primary" 
+            size="sm" 
+            onClick={handleChatClick}
+            className="d-flex align-items-center gap-1"
+          >
+            <FaComments /> Chat
+          </Button>
+        </div>
       </div>
       <div className="short-bold-text mt-1">{name}</div>
       <div className="mt-3">

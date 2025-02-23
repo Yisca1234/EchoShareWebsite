@@ -48,18 +48,16 @@ export const login = (useremail, password) => async (dispatch) => {
 
     try {
       sessionStorage.setItem('jwtToken', response.data.token);
+      sessionStorage.setItem('userId', response.data.user._id);
     } catch (e) {
       
     }  
 
-
     await dispatch(loginSuccess(response.data.userEmail));
     await dispatch(userRequest(response));
     
-
   } catch (error) {
     dispatch(loginFailure(error.response.data.message));
-    
   }
 };
 
@@ -68,6 +66,7 @@ export const login = (useremail, password) => async (dispatch) => {
 
 export const logoutAction = () => async (dispatch) => {
   await sessionStorage.removeItem('jwtToken');
+  await sessionStorage.removeItem('userId');
   await dispatch(logoutRequest());
 }
 
@@ -80,14 +79,13 @@ export const register = (emailUser, password) => async (dispatch) => {
     const response = await apiClient.post('/signup', { emailUser, password });
 
     sessionStorage.setItem('jwtToken', response.data.token);
+    sessionStorage.setItem('userId', response.data.user._id);
   
     await dispatch(registerSuccess(response.data.emailUser));
     await dispatch(userRequest(response));
-
     
   } catch (error) {
     await dispatch(registerFailure(error.response.data.message));
-    
   }
 };
 

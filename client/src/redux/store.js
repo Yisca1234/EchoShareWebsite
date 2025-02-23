@@ -1,28 +1,29 @@
-
 import { persistStore, persistReducer } from 'redux-persist';
-import storageSession from 'redux-persist/lib/storage/session';import { createStore, applyMiddleware, compose } from 'redux';
-import {thunk} from 'redux-thunk';
+import storage from 'redux-persist/lib/storage';
+import { configureStore } from '@reduxjs/toolkit';
 import rootReducer from './rootReducer.js';
 
 const persistConfig = {
   key: 'root',
-  storage: storageSession,
+  storage,
   whitelist: ['user', 'auth'],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-const composeEnhancers =
-  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__?.({
-    trace: true,
-    traceLimit: 25,
-  }) || compose;
-
-export const store = createStore(
-  persistedReducer,
-  composeEnhancers(applyMiddleware(thunk))
-);
+export const store = configureStore({
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE', 'persist/REGISTER'],
+      },
+    }),
+  devTools: process.env.NODE_ENV !== 'production',
+});
 
 export const persistor = persistStore(store);
+
+export default store;
 
 

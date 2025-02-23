@@ -1,88 +1,96 @@
-
 import { Navbar, Nav, OverlayTrigger, Popover, Image, Button } from 'react-bootstrap';
-import { FaIdBadge,FaClipboardList,FaPlus,FaPencilAlt,FaBookmark,FaUser, FaHome, FaBell, FaEnvelope, FaCog } from 'react-icons/fa';
+import { FaIdBadge, FaClipboardList, FaPlus, FaPencilAlt, FaBookmark, FaUser, FaHome, FaBell, FaEnvelope, FaCog, FaComments } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import '../styles/Sidebar.css';
-import {logoutAction} from '../redux/auth/actions.js'
-import {logout} from '../redux/user/actions.js'
-import {logout1} from '../redux/post/actions.js'
+import { logoutAction } from '../redux/auth/actions.js'
+import { logout } from '../redux/user/actions.js'
+import { logout1 } from '../redux/post/actions.js'
 import { useNavigate } from 'react-router-dom';
-
 import { useDispatch } from 'react-redux';
-
-
 
 const Sidebar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleLogout= async () => {
+  const handleLogout = async () => {
     await dispatch(logoutAction());
     await dispatch(logout());
     await dispatch(logout1());
     await dispatch(logout2());
-    //navigate('/signup');
   }
 
   const popover = (
     <Popover id="popover-basic">
       <Popover.Body>
         <a href='login'>
-          <Button variant="primary" onClick={handleLogout}>
+          <Button variant="primary" onClick={handleLogout} className="btn-sm">
             LogOut
           </Button>
         </a>
-        
       </Popover.Body>
     </Popover>
   );
 
   return (
-    <Navbar className="sidebar d-flex flex-column justify-content-between">
-      <Nav className="flex-column">
-        <Navbar.Brand>
-          <Image src="/echoShare.png" fluid roundedCircle className='brand' />
-        </Navbar.Brand>
-        <Nav.Link as={Link} to="/home" className="mt-3">
-          <div className='box11'>
-            <FaHome />
-            <h5 className='text5'>Home</h5>
-          </div>
-        </Nav.Link>
-        <Nav.Link as={Link} to="/profile">
-          <div className='box11'>
-            <FaIdBadge />
-            <h5 className='text5'>My Profile</h5>
-          </div>
-        </Nav.Link>
-        <Nav.Link as={Link} to="/subscribedChannelsList">
-          <div className='box11'>
-            <FaClipboardList />
-            <h5 className='text6'>Subscribed Channels</h5>
-          </div>
-        </Nav.Link>
-        <Nav.Link as={Link} to="/bookmarkedPosts">
-          <div className='box11'>
-            <FaBookmark />
-            <h5 className='text6'>Bookmark Posts</h5>
-          </div>
-        </Nav.Link>
-        <Nav.Link as={Link} to="/createNewPost">
-          <div className='box11'>
-            <FaPlus />
-            <h5 className='text6'>Create New Post</h5>
-          </div>
-        </Nav.Link>
-      </Nav>
-      <div className="profile-image-wrapper">
-        <OverlayTrigger
-          trigger="click"
-          placement="top"
-          overlay={popover}
-        >
-          <Image src="/account.png" roundedCircle fluid className='logout' />
-        </OverlayTrigger>
+    <Navbar className="sidebar d-flex flex-column vh-100">
+      <div className="nav-content-wrapper">
+        <div className='top-container'>
+          <Navbar.Brand className="text-center">
+            <Image src="/echoShare.png" fluid roundedCircle className='brand-small' />
+          </Navbar.Brand>
+
+          <Nav className="flex-column nav-buttons-container">
+            <Nav.Link as={Link} to="/home" className="nav-item">
+              <div className='box11'>
+                <FaHome className="nav-icon" />
+                <h6 className='text5 mb-0'>Home</h6>
+              </div>
+            </Nav.Link>
+            <Nav.Link as={Link} to="/profile" className="nav-item">
+              <div className='box11'>
+                <FaIdBadge className="nav-icon" />
+                <h6 className='text5 mb-0'>Profile</h6>
+              </div>
+            </Nav.Link>
+            <Nav.Link as={Link} to="/subscribedChannelsList" className="nav-item">
+              <div className='box11'>
+                <FaClipboardList className="nav-icon" />
+                <h6 className='text6 mb-0'>Channels</h6>
+              </div>
+            </Nav.Link>
+            <Nav.Link as={Link} to="/bookmarkedPosts" className="nav-item">
+              <div className='box11'>
+                <FaBookmark className="nav-icon" />
+                <h6 className='text6 mb-0'>Bookmarks</h6>
+              </div>
+            </Nav.Link>
+            <Nav.Link as={Link} to="/createNewPost" className="nav-item">
+              <div className='box11'>
+                <FaPlus className="nav-icon" />
+                <h6 className='text6 mb-0'>New Post</h6>
+              </div>
+            </Nav.Link>
+            <Nav.Link as={Link} to="/chat" className="nav-item">
+              <div className='box11'>
+                <FaComments className="nav-icon" />
+                <h6 className='text5 mb-0'>Chat</h6>
+              </div>
+            </Nav.Link>
+          </Nav>
+
+        </div>
+
+        <div className="profile-image-wrapper">
+          <OverlayTrigger
+            trigger="click"
+            placement="right"
+            overlay={popover}
+          >
+            <Image src="/account.png" roundedCircle fluid className='logout-small' />
+          </OverlayTrigger>
+        </div>
       </div>
     </Navbar>
   );
 };
+
 export default Sidebar;

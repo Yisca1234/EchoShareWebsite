@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const { SECRET } = require('../utils/config');
 
 const auth = (req, res, next) => {
+  
   try {
     const authHeader = req.header('Authorization');
 
@@ -20,8 +21,8 @@ const auth = (req, res, next) => {
         .status(401)
         .send({ message: 'Token verification failed. Authorization denied.' });
     }
-    console.log(decodedToken.id);
-    req.user = decodedToken.id;
+    // console.log(decodedToken.id);
+    req.user = { _id: decodedToken.id };
     next();
   } catch (error) {
     res.status(500).send({ message: error.message });

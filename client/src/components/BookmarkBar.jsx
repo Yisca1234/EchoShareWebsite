@@ -10,6 +10,7 @@ import { useState, useEffect, useRef } from 'react';
 const BookmarkBar = () => {
   const viewedPostsArray = useRef([]);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const handleHome = () => {
     navigate('/home');
   }

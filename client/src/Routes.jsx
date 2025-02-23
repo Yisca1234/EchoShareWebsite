@@ -11,6 +11,7 @@ import NotFound from './components/NotFound.jsx'
 import Modal from './components/Modal.jsx'
 import MobileScreen from './components/MobileScreen.jsx'
 import ChannelPage from './components/ChannelPage.jsx'
+import ChatPage from './components/chat/ChatPage.jsx'
 import { isMobile } from 'react-device-detect'; 
 import { useState, useEffect, useRef } from 'react'
 import { change_of_following } from './redux/post/actions.js'
@@ -64,6 +65,7 @@ const AppRoutes = () => {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/home" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/chat" element={<ChatPage />} />
           <Route path="/createNewPost" element={<CreatePostPage />} />
           <Route path="/bookmarkedPosts" element={<BookmarkedPostsPage />}/>
           <Route path="/subscribedChannelsList" element={<SubChannelsPage />} />

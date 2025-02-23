@@ -4,6 +4,7 @@ import userReducer from './user/userReducer';
 import channelReducer from './channel/channelReducer';
 import postReducer from './post/postReducer';
 import commentReducer from './comment/commentReducer.js';
+import chatReducer from './slices/chatSlice';
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -11,6 +12,7 @@ const rootReducer = combineReducers({
   post: postReducer,          
   channel: channelReducer,
   comment: commentReducer,
+  chat: chatReducer,
 });
 
 export default rootReducer;

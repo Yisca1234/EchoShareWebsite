@@ -9,11 +9,15 @@ const postRoutes = require('./routes/post');
 const userRoutes = require('./routes/user');
 const commentRoutes = require('./routes/comment.js');
 const channelRoutes = require('./routes/channel.js');
+const chatRoutes = require('./routes/chatRoutes');
 
 const app = express();
 
 if (process.env.NODE_ENV === 'development') {
-  app.use(cors());
+  app.use(cors({
+    origin: 'http://localhost:5173', // Vite's default port
+    credentials: true
+  }));
 }
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
@@ -23,6 +27,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/post', postRoutes);
 app.use('/api/comment', commentRoutes);
 app.use('/api/channel', channelRoutes);
+app.use('/api/chat', chatRoutes);
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.resolve(__dirname, './public/')));

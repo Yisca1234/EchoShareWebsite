@@ -41,7 +41,7 @@ const ChannelPage = () => {
   }, []);
 
   return (
-    <div className='no-scroll row-container1'      >
+    <div className='no-scroll row-container1'>
       <Sidebar />
       { authenticated && (
         loading ?
