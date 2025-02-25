@@ -131,7 +131,7 @@ const ChatPage = () => {
                 console.error('Invalid chat update received:', updatedChat);
                 return;
             }
-
+            console.log('updatedChat');
             // Create a new array with the updated chat
             const updatedChats = activeChats.map(chat => 
                 chat._id === updatedChat._id ? updatedChat : chat
@@ -170,7 +170,8 @@ const ChatPage = () => {
                     console.error('Invalid chats data received:', chats);
                     return;
                 }
-
+                
+                
                 // Add last message to each chat object
                 const chatsWithLastMessage = await Promise.all(chats.map(async (chat) => {
                     try {
@@ -191,6 +192,7 @@ const ChatPage = () => {
                         return chat;
                     }
                 }));
+                // console.log(chatsWithLastMessage);
 
                 dispatch(setActiveChats(chatsWithLastMessage));
                 setInitialized(true);
@@ -207,18 +209,27 @@ const ChatPage = () => {
     // Initialize chat with channel
     useEffect(() => {
         const initializeChat = async () => {
-            if (!channelId || !token || !isConnected || !initialized) return;
+            console.log(1);
+            console.log(channelId);
+            console.log(token);
+            console.log(isConnected);
+            console.log(initialized);
+            if (!token || !isConnected || !initialized) return;
 
             try {
+                console.log(2);
                 setIsInitializingChat(true);
                 const existingChat = activeChats.find(chat => 
                     chat.participants.some(p => p._id === channelId)
                 );
                 
                 if (existingChat) {
+                    console.log(3);
                     await selectChat(existingChat._id);
                 } else {
+                    console.log(4);
                     const result = await chatService.createRoom(channelId);
+                    console.log('result', result);
                     if (result) {
                         dispatch(setActiveChats(result.chats));
                         await selectChat(result.roomId);
