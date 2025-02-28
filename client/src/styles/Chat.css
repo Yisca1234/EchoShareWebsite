@@ -233,28 +233,40 @@
 
 .welcome-content {
   text-align: center;
+  padding: 2rem;
+  max-width: 400px;
 }
 
 .welcome-icon {
-  width: 4rem;
-  height: 4rem;
-  background-color: rgb(219 234 254);
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1rem auto;
+  color: rgb(59 130 246);
+  margin-bottom: 1.5rem;
 }
 
 .welcome-title {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  color: rgb(31 41 55);
-  margin-bottom: 0.5rem;
+  color: rgb(17 24 39);
+  margin-bottom: 0.75rem;
 }
 
 .welcome-text {
-  color: rgb(75 85 99);
+  color: rgb(107 114 128);
+  margin-bottom: 2rem;
+}
+
+.create-channel-button {
+  background-color: rgb(37 99 235);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.create-channel-button:hover {
+  background-color: rgb(29 78 216);
 }
 
 /* Message Component Styles */

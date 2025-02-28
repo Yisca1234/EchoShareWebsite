@@ -119,7 +119,10 @@ class ChatService {
                 channelId
             });
             
-            if (!response.data || !response.data.roomId) {
+            if (!response.data ) {
+                throw new Error('Invalid response from server');
+            }
+            if(channelId !== '111' && !response.data.roomId) {
                 throw new Error('Invalid response from server');
             }
             

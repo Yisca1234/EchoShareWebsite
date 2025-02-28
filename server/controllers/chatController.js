@@ -180,55 +180,53 @@ const createRoom = async (req, res) => {
     try {
         const { channelId } = req.body;
         const userId = req.header('userId');
-
-        // Convert IDs to ObjectId if they're not already
-        // const userObjectId = new mongoose.Types.ObjectId(userId);
-        // const channelObjectId = new mongoose.Types.ObjectId(channelId);
-
-        // Check if a chat already exists between these users (in either direction)
-        const existingChat = await Chat.findOne({
-            $and: [
-                { participants: { $size: 2 } },  // Ensure exactly 2 participants
-                { participants: { $all: [userId, channelId] } },
-                { isGroupChat: false }
-            ]
-        }).populate({
-            path: 'participants',
-            select: '_id avatar.username avatar.imageLink'
-        });
-
-        if (existingChat) {
-            const chats = await Chat.find({ participants: userId })
-                .populate({
-                    path: 'participants',
-                    select: '_id avatar.username avatar.imageLink'
-                })
-                .populate({
-                    path: 'lastMessage',
-                    populate: {
-                        path: 'sender',
-                        select: '_id avatar.username avatar.imageLink'
-                    }
-                })
-                .populate('createdBy', '_id avatar.username')
-                .sort({ updatedAt: -1 });
-
-            return res.status(200).json({ roomId: existingChat._id, chats });
+        const channel = await User.findById(userId).select('avatar.username avatar.imageLink');
+        if (!channel) {
+            return res.status(404).json({ message: 'User not found' });
         }
+
 
         // Get channel details
         console.log('userId', userId);
-        const channel = await User.findById(userId).select('avatar.username avatar.imageLink');
-        if (!channel) {
-            return res.status(404).json({ message: 'Channel not found' });
+        let newChat;
+        if(channelId !== '111') {
+            const existingChat = await Chat.findOne({
+                $and: [
+                    { participants: { $size: 2 } },  // Ensure exactly 2 participants
+                    { participants: { $all: [userId, channelId] } },
+                    { isGroupChat: false }
+                ]
+            }).populate({
+                path: 'participants',
+                select: '_id avatar.username avatar.imageLink'
+            });
+    
+            if (existingChat) {
+                const chats = await Chat.find({ participants: userId })
+                    .populate({
+                        path: 'participants',
+                        select: '_id avatar.username avatar.imageLink'
+                    })
+                    .populate({
+                        path: 'lastMessage',
+                        populate: {
+                            path: 'sender',
+                            select: '_id avatar.username avatar.imageLink'
+                        }
+                    })
+                    .populate('createdBy', '_id avatar.username')
+                    .sort({ updatedAt: -1 });
+    
+                return res.status(200).json({ roomId: existingChat._id, chats });
+            }
+            // channelId equal 111 if the chatpage is open trough the navbar
+            // Create new chat room without a name for one-on-one chats
+            newChat = await Chat.create({
+                participants: [userId, channelId],
+                createdBy: userId,
+                isGroupChat: false
+            });
         }
-
-        // Create new chat room without a name for one-on-one chats
-        const newChat = await Chat.create({
-            participants: [userId, channelId],
-            createdBy: userId,
-            isGroupChat: false
-        });
 
         // Get updated list of chats with populated data
         const chats = await Chat.find({ participants: userId })
@@ -246,7 +244,7 @@ const createRoom = async (req, res) => {
             .populate('createdBy', '_id avatar.username')
             .sort({ updatedAt: -1 });
 
-        res.status(201).json({ roomId: newChat._id, chats });
+        res.status(201).json({ roomId: newChat?._id, chats });
     } catch (error) {
         console.error('Error creating chat room:', error);
         res.status(500).json({ message: 'Error creating chat room' });

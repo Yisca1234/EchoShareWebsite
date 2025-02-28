@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSearchParams , useNavigate} from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import ChatMessage from './ChatMessage';
 import chatService from '../../services/chatService';
 import NavBar from '../NavBar';
@@ -14,8 +14,7 @@ import {
 } from '../../redux/slices/chatSlice';
 import '../../styles/Chat.css';
 import { isAuthenticated } from '../../redux/auth/selectors';
-import { getUserId } from '../../redux/user/selectors';
-
+import { getUserId, getAvatarName, isAvatar } from '../../redux/user/selectors';
 
 const ChatPage = () => {
     const dispatch = useDispatch();
@@ -31,6 +30,8 @@ const ChatPage = () => {
     const messagesEndRef = useRef(null);
     const navigate = useNavigate();
     const authenticated = useSelector(isAuthenticated);
+    const username = useSelector(getAvatarName);
+    const hasAvatar = useSelector(isAvatar);
     const cloud_name = "dojexlq8y";
 
     const {
@@ -43,14 +44,13 @@ const ChatPage = () => {
     const token = sessionStorage.getItem('jwtToken');
     const userId = useSelector(getUserId);
 
-
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     useEffect(() => {
-        if(!authenticated){
-          navigate('/');
+        if (!authenticated) {
+            navigate('/');
         }
     }, [authenticated]);
 
@@ -65,7 +65,7 @@ const ChatPage = () => {
             chatService.disconnect();
             dispatch(setConnected(false));
         };
-    }, []);
+    }, [token]);
 
     // Set up message listeners
     useEffect(() => {
@@ -157,10 +157,10 @@ const ChatPage = () => {
         scrollToBottom();
     }, [messages, currentRoom]);
 
-    // Fetch active chats once on mount
+    // Fetch active chats once on mount and when connection changes
     useEffect(() => {
         const fetchChats = async () => {
-            if (!token || initialized) return;
+            if (!token) return;
 
             try {
                 setIsLoading(true);
@@ -171,12 +171,9 @@ const ChatPage = () => {
                     return;
                 }
                 
-                
                 // Add last message to each chat object
                 const chatsWithLastMessage = await Promise.all(chats.map(async (chat) => {
                     try {
-                        // Assuming you'll add an API endpoint to get just the last message
-                        // If not available, you can modify the existing endpoint to limit=1
                         const messages = await chatService.getChatMessages(chat._id, { limit: 1 });
                         const lastMessage = Array.isArray(messages) && messages.length > 0 ? messages[0] : null;
                         
@@ -192,7 +189,6 @@ const ChatPage = () => {
                         return chat;
                     }
                 }));
-                // console.log(chatsWithLastMessage);
 
                 dispatch(setActiveChats(chatsWithLastMessage));
                 setInitialized(true);
@@ -203,37 +199,51 @@ const ChatPage = () => {
             }
         };
 
+        // Reset state when component mounts or token changes
+        if (!token) {
+            dispatch(setActiveChats([]));
+            setInitialized(false);
+            return;
+        }
+
         fetchChats();
     }, [token]);
 
     // Initialize chat with channel
     useEffect(() => {
+        
         const initializeChat = async () => {
-            console.log(1);
-            console.log(channelId);
-            console.log(token);
-            console.log(isConnected);
-            console.log(initialized);
-            if (!token || !isConnected || !initialized) return;
-
+            if (!token || !initialized) return;
             try {
-                console.log(2);
                 setIsInitializingChat(true);
-                const existingChat = activeChats.find(chat => 
-                    chat.participants.some(p => p._id === channelId)
-                );
                 
-                if (existingChat) {
-                    console.log(3);
-                    await selectChat(existingChat._id);
-                } else {
-                    console.log(4);
-                    const result = await chatService.createRoom(channelId);
-                    console.log('result', result);
-                    if (result) {
-                        dispatch(setActiveChats(result.chats));
-                        await selectChat(result.roomId);
+                // Only try to create/select chat if channelId is provided
+                if (channelId) {
+                    console.log(1);
+                    const existingChat = activeChats.find(chat => 
+                        chat.participants.some(p => p._id === channelId)
+                    );
+                    
+                    if (existingChat) {
+                        await selectChat(existingChat._id);
+                    } else {
+                        const result = await chatService.createRoom(channelId);
+                        console.log(result);
+                        if (result) {
+                            // Update active chats with the new chat
+                            const updatedChats = activeChats.concat(result.chats);
+                            console.log(updatedChats);
+                            dispatch(setActiveChats(updatedChats));
+                            await selectChat(result.roomId);
+                        }
                     }
+                } else {
+                    // If no channelId, only clear current room to show welcome screen
+                    // but keep the active chats in the sidebar
+                    const result = await chatService.createRoom('111');
+                    
+                    dispatch(setActiveChats(result.chats));
+                    dispatch(setCurrentRoom(null));
                 }
             } catch (error) {
                 console.error('Error initializing chat:', error);
@@ -243,7 +253,7 @@ const ChatPage = () => {
         };
 
         initializeChat();
-    }, [channelId, token, isConnected, initialized]);
+    }, [channelId, token, initialized]);
 
     const handleSendMessage = (e) => {
         e.preventDefault();
@@ -318,6 +328,16 @@ const ChatPage = () => {
             chatService.joinRoom(roomId);
             dispatch(setCurrentRoom(roomId));
             
+            // Find the chat and get the other participant's ID
+            const selectedChat = activeChats.find(chat => chat._id === roomId);
+            if (selectedChat) {
+                const otherParticipant = selectedChat.participants.find(p => p._id !== userId);
+                if (otherParticipant) {
+                    // Update the URL with the other participant's ID
+                    navigate(`/chat?channelId=${otherParticipant._id}`, { replace: true });
+                }
+            }
+            
             // Fetch all messages only when selecting a chat
             const messages = await chatService.getChatMessages(roomId);
             if (Array.isArray(messages) && messages.length > 0) {
@@ -341,6 +361,9 @@ const ChatPage = () => {
                     messages: []
                 }));
             }
+            
+            // Scroll to bottom after messages are loaded
+            setTimeout(() => scrollToBottom(), 100);
         } catch (error) {
             console.error('Error selecting chat:', error);
             dispatch(addMessage({
@@ -380,179 +403,199 @@ const ChatPage = () => {
             <NavBar />
             <div className="chat-wrapper">
                 <div className="chat-main">
-                    {/* Sidebar */}
-                    <div className="chat-sidebar">
-                        <div className="sidebar-header">
-                            <h2 className="sidebar-title">Messages</h2>
-                            <div className="search-container">
-                                <FiSearch className="search-icon" />
-                                <input
-                                    type="text"
-                                    placeholder="Search conversations..."
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="search-input"
-                                />
+                    {!hasAvatar || !username ? (
+                        <div className="welcome-screen">
+                            <div className="welcome-content">
+                                <div className="welcome-icon">
+                                    <FiMessageSquare size={48} />
+                                </div>
+                                <h3 className="welcome-title">Create Your Channel First</h3>
+                                <p className="welcome-text">You need to create a channel before you can start chatting</p>
+                                <button 
+                                    className="create-channel-button"
+                                    onClick={() => navigate('/profile')}
+                                >
+                                    Create Channel
+                                </button>
                             </div>
                         </div>
-                        <div className="chat-list">
-                            {isLoading ? (
-                                <div className="loading-chats">
-                                    {[1, 2, 3].map((n) => (
-                                        <div key={n} className="chat-item-skeleton">
-                                            <div className="avatar-skeleton"></div>
-                                            <div className="chat-info-skeleton">
-                                                <div className="name-skeleton"></div>
-                                                <div className="message-skeleton"></div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                filteredChats.map((chat) => {
-                                    const otherParticipant = getOtherParticipant(chat);
-                                    return (
-                                        <div
-                                            key={chat._id}
-                                            onClick={() => selectChat(chat._id)}
-                                            className={`chat-item ${currentRoom === chat._id ? 'active' : ''}`}
-                                        >
-                                            <div className="chat-item-content">
-                                                <div 
-                                                    className="avatar"
-                                                >
-                                                    <img 
-                                                        src={otherParticipant?.imageLink 
-                                                            ? `https://res.cloudinary.com/${cloud_name}/image/upload/${otherParticipant.imageLink}`
-                                                            : '/account.png'
-                                                        }
-                                                        alt={otherParticipant?.username || 'User avatar'}
-                                                        className="avatar-image"
-                                                    />
-                                                </div>
-                                                <div className="chat-item-info">
-                                                    <h3 className="chat-item-name">{getChatName(chat)}</h3>
-                                                    <p className="chat-item-last-message">
-                                                        {chat.lastMessage 
-                                                            ? chat.lastMessage.content
-                                                            : 'No messages yet'
-                                                        }
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                })
-                            )}
-                        </div>
-                    </div>
-
-                    {/* Chat Area */}
-                    <div className="chat-area">
-                        {isLoading || isInitializingChat ? (
-                            <div className="loading-chat-area">
-                                <div className="loading-spinner"></div>
-                                <p>Loading your conversations...</p>
-                            </div>
-                        ) : currentRoom ? (
-                            <>
-                                {/* Chat Header */}
-                                <div className="chat-header">
-                                    <div className="header-user-info">
-                                        {(() => {
-                                            const currentChat = getCurrentChat();
-                                            const otherParticipant = getOtherParticipant(currentChat);
-                                            
-                                            return (
-                                                <>
-                                                    <div 
-                                                        className="header-avatar"
-                                                    >
-                                                        <img 
-                                                            src={otherParticipant?.imageLink 
-                                                                ? `https://res.cloudinary.com/${cloud_name}/image/upload/${otherParticipant.imageLink}`
-                                                                : '/account.png'
-                                                            }
-                                                            alt={otherParticipant?.username || 'User avatar'}
-                                                            className="avatar-image pointer"
-                                                            onClick={() => navigate(`/channel/${otherParticipant?._id}`)}
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="header-name">
-                                                            {otherParticipant?.username || 'Unknown User'}
-                                                        </h3>
-                                                        {typingUsers[currentRoom]?.size > 0 && (
-                                                            <p className="typing-indicator">typing...</p>
-                                                        )}
-                                                    </div>
-                                                </>
-                                            );
-                                        })()}
-                                    </div>
-                                    <button className="more-options">
-                                        <FiMoreVertical />
-                                    </button>
-                                </div>
-
-                                {/* Messages */}
-                                <div className="messages-container">
-                                    <div className="messages-list">
-                                        {Array.isArray(messages[currentRoom]) && messages[currentRoom].map((msg, index) => {
-                                            if (!msg || !msg.content) return null;
-                                            
-                                            // If this message has a pending state, use that instead
-                                            const pendingMsg = msg.id && pendingMessages[msg.id];
-                                            const messageToShow = pendingMsg || msg;
-
-                                            // Ensure sender is a string and compare with userId as string
-                                            const isOwnMessage = (messageToShow.sender?.toString() || '') === userId.toString();
-
-                                            return (
-                                                <ChatMessage
-                                                    key={messageToShow.id || index}
-                                                    message={messageToShow}
-                                                    isOwnMessage={isOwnMessage}
-                                                    onRetry={handleRetry}
-                                                />
-                                            );
-                                        })}
-                                        <div ref={messagesEndRef} />
-                                    </div>
-                                </div>
-
-                                {/* Input Area */}
-                                <div className="input-area">
-                                    <form onSubmit={handleSendMessage} className="input-form">
+                    ) : (
+                        <>
+                            {/* Sidebar */}
+                            <div className="chat-sidebar">
+                                <div className="sidebar-header">
+                                    <h2 className="sidebar-title">Messages</h2>
+                                    <div className="search-container">
+                                        <FiSearch className="search-icon" />
                                         <input
                                             type="text"
-                                            value={message}
-                                            onChange={handleTyping}
-                                            placeholder="Type your message..."
-                                            className="message-input"
+                                            placeholder="Search conversations..."
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            className="search-input"
                                         />
-                                        <button
-                                            type="submit"
-                                            disabled={!message.trim()}
-                                            className="send-button"
-                                        >
-                                            <FiSend />
-                                        </button>
-                                    </form>
-                                </div>
-                            </>
-                        ) : (
-                            <div className="welcome-screen">
-                                <div className="welcome-content">
-                                    <div className="welcome-icon">
-                                        <FiMessageSquare />
                                     </div>
-                                    <h3 className="welcome-title">Welcome to Chat</h3>
-                                    <p className="welcome-text">Select a conversation to start messaging</p>
+                                </div>
+                                <div className="chat-list">
+                                    {isLoading ? (
+                                        <div className="loading-chats">
+                                            {[1, 2, 3].map((n) => (
+                                                <div key={n} className="chat-item-skeleton">
+                                                    <div className="avatar-skeleton"></div>
+                                                    <div className="chat-info-skeleton">
+                                                        <div className="name-skeleton"></div>
+                                                        <div className="message-skeleton"></div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        filteredChats.map((chat) => {
+                                            const otherParticipant = getOtherParticipant(chat);
+                                            return (
+                                                <div
+                                                    key={chat._id}
+                                                    onClick={() => selectChat(chat._id)}
+                                                    className={`chat-item ${currentRoom === chat._id ? 'active' : ''}`}
+                                                >
+                                                    <div className="chat-item-content">
+                                                        <div 
+                                                            className="avatar"
+                                                        >
+                                                            <img 
+                                                                src={otherParticipant?.imageLink 
+                                                                    ? `https://res.cloudinary.com/${cloud_name}/image/upload/${otherParticipant.imageLink}`
+                                                                    : '/account.png'
+                                                                }
+                                                                alt={otherParticipant?.username || 'User avatar'}
+                                                                className="avatar-image"
+                                                            />
+                                                        </div>
+                                                        <div className="chat-item-info">
+                                                            <h3 className="chat-item-name">{getChatName(chat)}</h3>
+                                                            <p className="chat-item-last-message">
+                                                                {chat.lastMessage 
+                                                                    ? chat.lastMessage.content
+                                                                    : 'No messages yet'
+                                                                }
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    )}
                                 </div>
                             </div>
-                        )}
-                    </div>
+
+                            {/* Chat Area */}
+                            <div className="chat-area">
+                                {isLoading || isInitializingChat ? (
+                                    <div className="loading-chat-area">
+                                        <div className="loading-spinner"></div>
+                                        <p>Loading your conversations...</p>
+                                    </div>
+                                ) : currentRoom ? (
+                                    <>
+                                        {/* Chat Header */}
+                                        <div className="chat-header">
+                                            <div className="header-user-info">
+                                                {(() => {
+                                                    const currentChat = getCurrentChat();
+                                                    const otherParticipant = getOtherParticipant(currentChat);
+                                                    
+                                                    return (
+                                                        <>
+                                                            <div 
+                                                                className="header-avatar"
+                                                            >
+                                                                <img 
+                                                                    src={otherParticipant?.imageLink 
+                                                                        ? `https://res.cloudinary.com/${cloud_name}/image/upload/${otherParticipant.imageLink}`
+                                                                        : '/account.png'
+                                                                    }
+                                                                    alt={otherParticipant?.username || 'User avatar'}
+                                                                    className="avatar-image pointer"
+                                                                    onClick={() => navigate(`/channel/${otherParticipant?._id}`)}
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <h3 className="header-name">
+                                                                    {otherParticipant?.username || 'Unknown User'}
+                                                                </h3>
+                                                                {typingUsers[currentRoom]?.size > 0 && (
+                                                                    <p className="typing-indicator">typing...</p>
+                                                                )}
+                                                            </div>
+                                                        </>
+                                                    );
+                                                })()}
+                                            </div>
+                                            <button className="more-options">
+                                                <FiMoreVertical />
+                                            </button>
+                                        </div>
+
+                                        {/* Messages */}
+                                        <div className="messages-container">
+                                            <div className="messages-list">
+                                                {Array.isArray(messages[currentRoom]) && messages[currentRoom].map((msg, index) => {
+                                                    if (!msg || !msg.content) return null;
+                                                    
+                                                    // If this message has a pending state, use that instead
+                                                    const pendingMsg = msg.id && pendingMessages[msg.id];
+                                                    const messageToShow = pendingMsg || msg;
+
+                                                    // Ensure sender is a string and compare with userId as string
+                                                    const isOwnMessage = (messageToShow.sender?.toString() || '') === userId.toString();
+
+                                                    return (
+                                                        <ChatMessage
+                                                            key={messageToShow.id || index}
+                                                            message={messageToShow}
+                                                            isOwnMessage={isOwnMessage}
+                                                            onRetry={handleRetry}
+                                                        />
+                                                    );
+                                                })}
+                                                <div ref={messagesEndRef} />
+                                            </div>
+                                        </div>
+
+                                        {/* Input Area */}
+                                        <div className="input-area">
+                                            <form onSubmit={handleSendMessage} className="input-form">
+                                                <input
+                                                    type="text"
+                                                    value={message}
+                                                    onChange={handleTyping}
+                                                    placeholder="Type your message..."
+                                                    className="message-input"
+                                                />
+                                                <button
+                                                    type="submit"
+                                                    disabled={!message.trim()}
+                                                    className="send-button"
+                                                >
+                                                    <FiSend />
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="welcome-screen">
+                                        <div className="welcome-content">
+                                            <div className="welcome-icon">
+                                                <FiMessageSquare />
+                                            </div>
+                                            <h3 className="welcome-title">Welcome to Chat</h3>
+                                            <p className="welcome-text">Select a conversation to start messaging</p>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
