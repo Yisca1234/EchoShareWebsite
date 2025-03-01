@@ -22,11 +22,11 @@ const Login = () => {
   const authenticated = useSelector(isAuthenticated);
   const avatarExists = useSelector(isExists);
 
-  useEffect(() => {
-    if (authenticated & avatarExists) {
-      navigate('/home');
-    }
-  }, [authenticated, dispatch, avatarExists]);
+  // useEffect(() => {
+  //   if (authenticated & avatarExists) {
+  //     navigate('/home');
+  //   }
+  // }, [authenticated, dispatch, avatarExists]);
 
   const handleChange = (e) => {
     setFormData({
