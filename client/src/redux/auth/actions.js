@@ -46,12 +46,12 @@ export const login = (useremail, password) => async (dispatch) => {
   try {
     const response = await apiClient.post('/login', { useremail, password });
 
-    try {
-      sessionStorage.setItem('jwtToken', response.data.token);
-      sessionStorage.setItem('userId', response.data.user._id);
-    } catch (e) {
+    // try {
+    //   sessionStorage.setItem('jwtToken', response.data.token);
+    //   sessionStorage.setItem('userId', response.data.user._id);
+    // } catch (e) {
       
-    }  
+    // }  
 
     await dispatch(loginSuccess(response.data.userEmail, response.data.token));
     await dispatch(userRequest(response));

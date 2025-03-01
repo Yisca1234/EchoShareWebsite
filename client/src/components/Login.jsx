@@ -29,9 +29,12 @@ const Login = () => {
   useEffect(() => {
     // console.log(authenticated, avatarExists);
     const userConnected = async () => {
-      if (authenticated & avatarExists & token & userId) {
+      // console.log(authenticated, avatarExists, token, userId);
+      if (authenticated && avatarExists && token && userId) {
+        // console.log('bbbconnected'); 
         await sessionStorage.setItem('jwtToken', token);
         await sessionStorage.setItem('userId', userId);
+        // console.log('connected'); 
         navigate('/home');
       }
     }
