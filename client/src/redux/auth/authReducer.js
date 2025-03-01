@@ -9,6 +9,7 @@ import {
 const initialState = {
   isAuthenticated: false,
   userEmail: null,
+  token: null,
   error: null,
 };
 
@@ -19,6 +20,7 @@ const authReducer = (state = initialState, action) => {
         ...state,
         isAuthenticated: true,
         userEmail: action.payload.userEmail,
+        token: action.payload.token,
         error: null,
       };
 

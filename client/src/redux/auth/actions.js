@@ -31,9 +31,9 @@ export const registerFailure = (error) => ({
 });
 
 
-export const loginSuccess = (userEmail) => ({
+export const loginSuccess = (userEmail, token) => ({
   type: LOGIN_SUCCESS,
-  payload: {userEmail},
+  payload: {userEmail, token},
 });
 
 export const loginFailure = (error) => ({
@@ -53,7 +53,7 @@ export const login = (useremail, password) => async (dispatch) => {
       
     }  
 
-    await dispatch(loginSuccess(response.data.userEmail));
+    await dispatch(loginSuccess(response.data.userEmail, response.data.token));
     await dispatch(userRequest(response));
     
   } catch (error) {

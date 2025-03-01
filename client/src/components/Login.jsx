@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { login } from '../redux/auth/actions.js';
 import { selectAuthError,isAuthenticated  } from '../redux/auth/selectors';
-import { isExists  } from '../redux/user/selectors';
+import { isExists, getUserId } from '../redux/user/selectors';
+import apiClient from '../utils/apiClient.js';
+import { getToken } from '../redux/auth/selectors';
 
 
 const Login = () => {
@@ -21,12 +23,20 @@ const Login = () => {
   const authError = useSelector(selectAuthError);
   const authenticated = useSelector(isAuthenticated);
   const avatarExists = useSelector(isExists);
+  const token = useSelector(getToken);
+  const userId = useSelector(getUserId);
 
-  // useEffect(() => {
-  //   if (authenticated & avatarExists) {
-  //     navigate('/home');
-  //   }
-  // }, [authenticated, dispatch, avatarExists]);
+  useEffect(() => {
+    // console.log(authenticated, avatarExists);
+    const userConnected = async () => {
+      if (authenticated & avatarExists & token & userId) {
+        await sessionStorage.setItem('jwtToken', token);
+        await sessionStorage.setItem('userId', userId);
+        navigate('/home');
+      }
+    }
+    userConnected();
+  }, [authenticated, dispatch, avatarExists]);
 
   const handleChange = (e) => {
     setFormData({
