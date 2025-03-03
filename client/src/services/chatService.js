@@ -9,7 +9,10 @@ class ChatService {
     }
 
     connect(token, userId) {
-        this.socket = io('http://localhost:5000', {
+        const socketUrl = process.env.NODE_ENV === 'development' 
+            ? 'http://localhost:5000' 
+            : 'https://app.echo-share.click';
+        this.socket = io(socketUrl, {
             auth: {
                 token
             },

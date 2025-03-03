@@ -7,11 +7,11 @@ const User = require('./models/user');
 
 function setupSocket(server) {
     const io = new Server(server, {
-        cors: {
+        cors: process.env.NODE_ENV === 'development' ? {
             origin: "http://localhost:5173", // Vite's default port
             methods: ["GET", "POST"],
             credentials: true
-        }
+        } : false
     });
 
     // Socket.IO middleware for authentication
