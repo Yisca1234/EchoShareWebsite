@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
     activeChats: [], // List of chat rooms the user is part of
     messages: {}, // Messages grouped by room ID
-    typingUsers: {}, // Users currently typing in each room
+    typingUsers: {}, // Users currently typing in each room, stored as {roomId: {userId: true}}
     currentRoom: null,
     isConnected: false,
     error: null
@@ -51,12 +51,13 @@ const chatSlice = createSlice({
         setTypingUser: (state, action) => {
             const { roomId, userId, isTyping } = action.payload;
             if (!state.typingUsers[roomId]) {
-                state.typingUsers[roomId] = new Set();
+                state.typingUsers[roomId] = {};
             }
+            
             if (isTyping) {
-                state.typingUsers[roomId].add(userId);
+                state.typingUsers[roomId][userId] = true;
             } else {
-                state.typingUsers[roomId].delete(userId);
+                delete state.typingUsers[roomId][userId];
             }
         },
         clearChat: (state, action) => {

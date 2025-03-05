@@ -141,6 +141,7 @@ const ChatPage = () => {
         });
 
         chatService.onTyping(({ roomId, userId, isTyping }) => {
+            console.log(`Received typing event: User ${userId} is ${isTyping ? 'typing' : 'stopped typing'} in room ${roomId}`);
             dispatch(setTypingUser({ roomId, userId, isTyping }));
         });
 
@@ -311,26 +312,57 @@ const ChatPage = () => {
         });
     };
 
+    const typingTimeoutRef = useRef(null);
+
     const handleTyping = (e) => {
         setMessage(e.target.value);
+        
+        // Clear any existing timeout
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+        
         if (!isTyping && currentRoom) {
+            // Only emit typing start if not already typing
+            console.log(`Emitting typing start: User ${userId} in room ${currentRoom}`);
             setIsTyping(true);
-            chatService.emitTyping(currentRoom, userId);
-            setTimeout(() => {
+            chatService.emitTyping(currentRoom, userId, true);
+        }
+        
+        // Always set a new timeout to stop typing indicator
+        typingTimeoutRef.current = setTimeout(() => {
+            if (isTyping && currentRoom) {
+                console.log(`Emitting typing stop: User ${userId} in room ${currentRoom}`);
                 setIsTyping(false);
                 chatService.emitTyping(currentRoom, userId, false);
-            }, 2000);
-        }
+            }
+        }, 2000);
     };
 
     const selectChat = async (roomId) => {
         try {
+            console.log(`Selecting chat room ${roomId}`);
+            
+            // If we're already in a room, leave it first
+            if (currentRoom) {
+                console.log(`Leaving current room ${currentRoom}`);
+                chatService.leaveRoom(currentRoom);
+                
+                // Make sure to stop typing indicator when leaving a room
+                if (isTyping) {
+                    console.log(`Stopping typing in room ${currentRoom} before leaving`);
+                    setIsTyping(false);
+                    chatService.emitTyping(currentRoom, userId, false);
+                }
+            }
+            
             chatService.joinRoom(roomId);
             dispatch(setCurrentRoom(roomId));
             
             // Find the chat and get the other participant's ID
             const selectedChat = activeChats.find(chat => chat._id === roomId);
             if (selectedChat) {
+                console.log(`Selected chat:`, selectedChat);
                 const otherParticipant = selectedChat.participants.find(p => p._id !== userId);
                 if (otherParticipant) {
                     // Update the URL with the other participant's ID
@@ -397,6 +429,30 @@ const ChatPage = () => {
         const chatName = getChatName(chat);
         return chatName.toLowerCase().includes(searchQuery.toLowerCase());
     });
+
+    // Clean up typing timeout on unmount or when changing rooms
+    useEffect(() => {
+        return () => {
+            if (typingTimeoutRef.current) {
+                clearTimeout(typingTimeoutRef.current);
+            }
+            
+            // Make sure to stop typing indicator when leaving a room
+            if (isTyping && currentRoom) {
+                chatService.emitTyping(currentRoom, userId, false);
+                setIsTyping(false);
+            }
+        };
+    }, [currentRoom, isTyping, userId]);
+
+    // Log typingUsers state when it changes
+    useEffect(() => {
+        if (currentRoom && typingUsers[currentRoom]) {
+            console.log('Current typing users:', typingUsers[currentRoom]);
+        }
+    }, [typingUsers, currentRoom]);
+
+    console.log('typingUsers', typingUsers[currentRoom]);
 
     return (
         <div className="chat-container">
@@ -523,9 +579,19 @@ const ChatPage = () => {
                                                                 <h3 className="header-name">
                                                                     {otherParticipant?.username || 'Unknown User'}
                                                                 </h3>
-                                                                {typingUsers[currentRoom]?.size > 0 && (
-                                                                    <p className="typing-indicator">typing...</p>
-                                                                )}
+                                                                {/* <p className="typing-indicator">
+                                                                    {otherParticipant?.username || 'Someone'} is typing
+                                                                </p> */}
+                                                                {/* {(() => {
+                                                                    const hasTypingUsers = typingUsers[currentRoom] && 
+                                                                        Object.keys(typingUsers[currentRoom]).length > 0;
+                                                                    console.log('Has typing users:', hasTypingUsers, typingUsers[currentRoom]);
+                                                                    return hasTypingUsers && (
+                                                                        <p className="typing-indicator">
+                                                                            {otherParticipant?.username || 'Someone'} is typing
+                                                                        </p>
+                                                                    );
+                                                                })()} */}
                                                             </div>
                                                         </>
                                                     );
@@ -561,6 +627,17 @@ const ChatPage = () => {
                                                 <div ref={messagesEndRef} />
                                             </div>
                                         </div>
+
+                                        {(() => {
+                                            const hasTypingUsers = typingUsers[currentRoom] && 
+                                                Object.keys(typingUsers[currentRoom]).length > 0;
+                                            console.log('Has typing users:', hasTypingUsers, typingUsers[currentRoom]);
+                                            return hasTypingUsers && (
+                                                <p className="typing-indicator">
+                                                    typing
+                                                </p>
+                                            );
+                                        })()}
 
                                         {/* Input Area */}
                                         <div className="input-area">

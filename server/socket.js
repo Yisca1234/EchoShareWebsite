@@ -38,30 +38,40 @@ function setupSocket(server) {
 
         // Join a chat room
         socket.on('join_room', async (roomId) => {
-            console.log('join_room', roomId);
+            console.log(`User ${socket.userId} (socket ${socket.id}) is joining room ${roomId}`);
             try {
                 const chat = await Chat.findById(roomId);
                 if (!chat) {
+                    console.error(`Chat room ${roomId} not found`);
                     socket.emit('error', { message: 'Chat not found' });
                     return;
                 }
-                // console.log('chat', chat);
-                // if (!chat.participants.includes(socket.userId)) {
-                //     socket.emit('error', { message: 'Not authorized to join this chat' });
-                //     return;
-                // }
-
+                
                 socket.join(roomId);
-                console.log(`User ${socket.userId} joined room ${roomId}`);
+                console.log(`User ${socket.userId} (socket ${socket.id}) successfully joined room ${roomId}`);
+                
+                // Notify other users in the room that this user has joined
+                socket.to(roomId).emit('user_joined', {
+                    userId: socket.userId,
+                    roomId
+                });
             } catch (error) {
+                console.error(`Error joining chat room ${roomId}:`, error);
                 socket.emit('error', { message: 'Error joining chat room' });
             }
         });
 
         // Leave a chat room
         socket.on('leave_room', (roomId) => {
+            console.log(`User ${socket.userId} (socket ${socket.id}) is leaving room ${roomId}`);
             socket.leave(roomId);
-            console.log(`User ${socket.userId} left room ${roomId}`);
+            console.log(`User ${socket.userId} (socket ${socket.id}) successfully left room ${roomId}`);
+            
+            // Notify other users in the room that this user has left
+            socket.to(roomId).emit('user_left', {
+                userId: socket.userId,
+                roomId
+            });
         });
 
         // Handle new message
@@ -144,17 +154,44 @@ function setupSocket(server) {
         });
 
         // Handle typing status
-        socket.on('typing', ({ roomId, isTyping }) => {
+        socket.on('typing', ({ roomId, userId, isTyping }) => {
+            console.log(`User ${userId} (socket ${socket.id}) is ${isTyping ? 'typing' : 'stopped typing'} in room ${roomId}`);
+            
+            // Check if the socket is in the room
+            const rooms = Array.from(socket.rooms);
+            if (!rooms.includes(roomId)) {
+                console.warn(`Socket ${socket.id} is not in room ${roomId}, joining now`);
+                socket.join(roomId);
+            }
+            
+            // Broadcast typing status to all other users in the room
             socket.to(roomId).emit('user_typing', {
-                userId: socket.userId,
+                userId: userId,
                 roomId,
                 isTyping
             });
+            
+            console.log(`Typing status broadcast to room ${roomId}`);
         });
 
         // Handle disconnection
         socket.on('disconnect', () => {
-            console.log(`User disconnected: ${socket.userId}`);
+            console.log(`User ${socket.userId} (socket ${socket.id}) disconnected`);
+            
+            // Get all rooms the socket was in
+            const rooms = Array.from(socket.rooms);
+            console.log(`Socket ${socket.id} was in rooms:`, rooms);
+            
+            // Notify all rooms that the user has disconnected
+            rooms.forEach(room => {
+                if (room !== socket.id) { // Skip the default room (socket.id)
+                    socket.to(room).emit('user_disconnected', {
+                        userId: socket.userId,
+                        roomId: room
+                    });
+                }
+            });
+            
             connectedUsers.delete(socket.userId);
         });
     });
