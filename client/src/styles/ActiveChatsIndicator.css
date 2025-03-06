@@ -1,0 +1,82 @@
+.active-chats-indicator {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 220px;
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  border: 1px solid #e0e0e0;
+}
+
+.active-chats-header {
+  padding: 10px 15px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  background-color: #f8f9fa;
+  border-radius: 8px 8px 0 0;
+}
+
+.active-chats-list {
+  padding: 5px 0;
+}
+
+.active-chat-item {
+  padding: 8px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.active-chat-item:hover {
+  background-color: #f5f5f5;
+}
+
+.active-chat-name {
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+.active-chat-badge {
+  background-color: #007bff;
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  padding: 0 4px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .active-chats-indicator {
+    background-color: #2a2a2a;
+    border-color: #444;
+  }
+  
+  .active-chats-header {
+    color: #e0e0e0;
+    background-color: #333;
+    border-bottom-color: #444;
+  }
+  
+  .active-chat-item:hover {
+    background-color: #3a3a3a;
+  }
+  
+  .active-chat-name {
+    color: #e0e0e0;
+  }
+}

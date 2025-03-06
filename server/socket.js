@@ -33,12 +33,13 @@ function setupSocket(server) {
     const connectedUsers = new Map();
 
     io.on('connection', (socket) => {
-        console.log(`User connected: ${socket.userId}`);
+        //console.log(`User connected: ${socket.userId}`);
         connectedUsers.set(socket.userId, socket.id);
 
         // Join a chat room
         socket.on('join_room', async (roomId) => {
-            console.log(`User ${socket.userId} (socket ${socket.id}) is joining room ${roomId}`);
+            //
+            // console.log(`User ${socket.userId} (socket ${socket.id}) is joining room ${roomId}`);
             try {
                 const chat = await Chat.findById(roomId);
                 if (!chat) {
@@ -48,7 +49,7 @@ function setupSocket(server) {
                 }
                 
                 socket.join(roomId);
-                console.log(`User ${socket.userId} (socket ${socket.id}) successfully joined room ${roomId}`);
+                //console.log(`User ${socket.userId} (socket ${socket.id}) successfully joined room ${roomId}`);
                 
                 // Notify other users in the room that this user has joined
                 socket.to(roomId).emit('user_joined', {
@@ -63,9 +64,9 @@ function setupSocket(server) {
 
         // Leave a chat room
         socket.on('leave_room', (roomId) => {
-            console.log(`User ${socket.userId} (socket ${socket.id}) is leaving room ${roomId}`);
+            //console.log(`User ${socket.userId} (socket ${socket.id}) is leaving room ${roomId}`);
             socket.leave(roomId);
-            console.log(`User ${socket.userId} (socket ${socket.id}) successfully left room ${roomId}`);
+            //console.log(`User ${socket.userId} (socket ${socket.id}) successfully left room ${roomId}`);
             
             // Notify other users in the room that this user has left
             socket.to(roomId).emit('user_left', {
@@ -116,7 +117,7 @@ function setupSocket(server) {
                 // Emit to all users in the room
                 try {
                     io.to(roomId).emit('receive_message', messageToSend);
-                    console.log('message sent by server');
+                    //console.log('message sent by server');
 
                 } catch (error) {
                     console.error('Error emitting message to room:', error);
@@ -155,7 +156,7 @@ function setupSocket(server) {
 
         // Handle typing status
         socket.on('typing', ({ roomId, userId, isTyping }) => {
-            console.log(`User ${userId} (socket ${socket.id}) is ${isTyping ? 'typing' : 'stopped typing'} in room ${roomId}`);
+            //console.log(`User ${userId} (socket ${socket.id}) is ${isTyping ? 'typing' : 'stopped typing'} in room ${roomId}`);
             
             // Check if the socket is in the room
             const rooms = Array.from(socket.rooms);
@@ -171,16 +172,16 @@ function setupSocket(server) {
                 isTyping
             });
             
-            console.log(`Typing status broadcast to room ${roomId}`);
+            //console.log(`Typing status broadcast to room ${roomId}`);
         });
 
         // Handle disconnection
         socket.on('disconnect', () => {
-            console.log(`User ${socket.userId} (socket ${socket.id}) disconnected`);
+            //console.log(`User ${socket.userId} (socket ${socket.id}) disconnected`);
             
             // Get all rooms the socket was in
             const rooms = Array.from(socket.rooms);
-            console.log(`Socket ${socket.id} was in rooms:`, rooms);
+            //console.log(`Socket ${socket.id} was in rooms:`, rooms);
             
             // Notify all rooms that the user has disconnected
             rooms.forEach(room => {

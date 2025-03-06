@@ -87,7 +87,13 @@ class ChatService {
     onTyping(callback) {
         if (!this.socket) return;
         console.log('Registering typing event listener');
-        this.socket.on('user_typing', callback);
+        this.socket.on('user_typing', (data) => {
+            // Only notify about other users typing, not the current user
+            const currentUserId = sessionStorage.getItem('userId');
+            if (data.userId !== currentUserId) {
+                callback(data);
+            }
+        });
     }
 
     offTyping() {
@@ -119,6 +125,16 @@ class ChatService {
         } catch (error) {
             console.error('Error fetching messages:', error);
             throw error;
+        }
+    }
+
+    async getChatById(chatId) {
+        try {
+            const response = await apiClient.get(`/chat/${chatId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching chat by ID:', error);
+            return null;
         }
     }
 

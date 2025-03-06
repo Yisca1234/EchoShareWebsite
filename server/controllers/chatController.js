@@ -49,8 +49,10 @@ const User = require('../models/user');
 
 // Get all chats for current user
 const getUserChats = async (req, res) => {
+    // console.log(req.user._id);
+    const userId = req.header('userId');
     try {
-        const chats = await Chat.find({ participants: req.user._id })
+        const chats = await Chat.find({ participants: userId })
             .populate({
                 path: 'participants',
                 select: '_id avatar.username avatar.imageLink'
@@ -187,7 +189,7 @@ const createRoom = async (req, res) => {
 
 
         // Get channel details
-        console.log('userId', userId);
+        //console.log('userId', userId);
         let newChat;
         if(channelId !== '111') {
             const existingChat = await Chat.findOne({

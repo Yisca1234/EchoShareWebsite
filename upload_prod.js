@@ -15,7 +15,7 @@ try {
 
    // Commit changes to Git
    console.log('Committing changes...');
-   execSync('git commit -m "liveChat1.2"', { stdio: 'inherit' });
+   execSync('git commit -m "liveChat1.3"', { stdio: 'inherit' });
 
    // Push changes to the repository
    console.log('Pushing changes to the repository...');

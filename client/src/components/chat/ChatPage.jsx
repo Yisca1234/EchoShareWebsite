@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import ChatMessage from './ChatMessage';
 import chatService from '../../services/chatService';
+import globalChatService from '../../services/globalChatService';
 import NavBar from '../NavBar';
 import { FiSend, FiSearch, FiMoreVertical, FiMessageSquare } from 'react-icons/fi';
 import {
@@ -15,6 +16,8 @@ import {
 import '../../styles/Chat.css';
 import { isAuthenticated } from '../../redux/auth/selectors';
 import { getUserId, getAvatarName, isAvatar } from '../../redux/user/selectors';
+import ChatNotificationSettings from './ChatNotificationSettings';
+// import ActiveChatsIndicator from './ActiveChatsIndicator';
 
 const ChatPage = () => {
     const dispatch = useDispatch();
@@ -81,7 +84,7 @@ const ChatPage = () => {
             const senderAvatar = sender.avatar || {};
 
             // If this is a confirmation of our pending message, update its status
-            if (pendingMessages[data.tempId]) {
+            if (data.tempId && pendingMessages[data.tempId]) {
                 const updatedPending = { ...pendingMessages };
                 delete updatedPending[data.tempId];
                 setPendingMessages(updatedPending);
@@ -101,19 +104,65 @@ const ChatPage = () => {
                     tempId: data.tempId // Add tempId to identify the message to update
                 }));
             } else {
-                // This is a new message from another user
-                dispatch(addMessage({
-                    roomId: data.chat,
-                    message: {
-                        id: data._id,
-                        content: data.content,
-                        sender: sender._id?.toString() || '',
-                        senderName: senderAvatar.username || 'Unknown User',
-                        senderImage: senderAvatar.imageLink || null,
-                        timestamp: data.createdAt || new Date().toISOString(),
-                        status: 'sent'
+                // Only add messages from other users, not our own
+                if (sender._id?.toString() !== userId.toString()) {
+                    // Try to get more complete sender information from the active chats
+                    let senderName = senderAvatar.username || 'Unknown User';
+                    let senderImage = senderAvatar.imageLink || null;
+                    
+                    // Find the chat in active chats
+                    const chat = activeChats.find(c => c._id === data.chat);
+                    if (chat) {
+                        // Find the sender in the participants
+                        const participant = chat.participants.find(p => p._id === sender._id);
+                        if (participant && participant.avatar) {
+                            senderName = participant.avatar.username || senderName;
+                            senderImage = participant.avatar.imageLink || senderImage;
+                        }
                     }
-                }));
+                    
+                    // This is a new message from another user
+                    dispatch(addMessage({
+                        roomId: data.chat,
+                        message: {
+                            id: data._id,
+                            content: data.content,
+                            sender: sender._id?.toString() || '',
+                            senderName: senderName,
+                            senderImage: senderImage,
+                            timestamp: data.createdAt || new Date().toISOString(),
+                            status: 'sent'
+                        }
+                    }));
+                    
+                    // If we couldn't get complete sender info, fetch updated chat data
+                    if (senderName === 'Unknown User' && data.chat) {
+                        // Fetch updated chat information to get complete user data
+                        chatService.getChatById(data.chat)
+                            .then(updatedChat => {
+                                if (updatedChat && updatedChat.participants) {
+                                    const updatedSender = updatedChat.participants.find(p => p._id === sender._id);
+                                    if (updatedSender && updatedSender.avatar && updatedSender.avatar.username) {
+                                        // Update the message with the correct sender name
+                                        dispatch(addMessage({
+                                            roomId: data.chat,
+                                            message: {
+                                                id: data._id,
+                                                content: data.content,
+                                                sender: sender._id?.toString() || '',
+                                                senderName: updatedSender.avatar.username,
+                                                senderImage: updatedSender.avatar.imageLink || null,
+                                                timestamp: data.createdAt || new Date().toISOString(),
+                                                status: 'sent'
+                                            },
+                                            tempId: data._id // Use the message ID to update it
+                                        }));
+                                    }
+                                }
+                            })
+                            .catch(err => console.error('Error fetching updated chat data:', err));
+                    }
+                }
             }
         });
 
@@ -131,17 +180,19 @@ const ChatPage = () => {
                 console.error('Invalid chat update received:', updatedChat);
                 return;
             }
-            console.log('updatedChat');
+            //console.log('updatedChat');
             // Create a new array with the updated chat
             const updatedChats = activeChats.map(chat => 
                 chat._id === updatedChat._id ? updatedChat : chat
             ).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
             dispatch(setActiveChats(updatedChats));
+            console.log('chats2', updatedChats);
+
         });
 
         chatService.onTyping(({ roomId, userId, isTyping }) => {
-            console.log(`Received typing event: User ${userId} is ${isTyping ? 'typing' : 'stopped typing'} in room ${roomId}`);
+            //console.log(`Received typing event: User ${userId} is ${isTyping ? 'typing' : 'stopped typing'} in room ${roomId}`);
             dispatch(setTypingUser({ roomId, userId, isTyping }));
         });
 
@@ -192,6 +243,7 @@ const ChatPage = () => {
                 }));
 
                 dispatch(setActiveChats(chatsWithLastMessage));
+                console.log('chats3', chatsWithLastMessage);
                 setInitialized(true);
             } catch (error) {
                 console.error('Error fetching chats:', error);
@@ -203,6 +255,7 @@ const ChatPage = () => {
         // Reset state when component mounts or token changes
         if (!token) {
             dispatch(setActiveChats([]));
+            console.log('chats4', []);
             setInitialized(false);
             return;
         }
@@ -220,7 +273,7 @@ const ChatPage = () => {
                 
                 // Only try to create/select chat if channelId is provided
                 if (channelId) {
-                    console.log(1);
+                    //console.log(1);
                     const existingChat = activeChats.find(chat => 
                         chat.participants.some(p => p._id === channelId)
                     );
@@ -229,12 +282,13 @@ const ChatPage = () => {
                         await selectChat(existingChat._id);
                     } else {
                         const result = await chatService.createRoom(channelId);
-                        console.log(result);
+                        //console.log(result);
                         if (result) {
                             // Update active chats with the new chat
                             const updatedChats = activeChats.concat(result.chats);
-                            console.log(updatedChats);
+                            //console.log(updatedChats);
                             dispatch(setActiveChats(updatedChats));
+                            console.log('chats5', updatedChats);
                             await selectChat(result.roomId);
                         }
                     }
@@ -244,6 +298,7 @@ const ChatPage = () => {
                     const result = await chatService.createRoom('111');
                     
                     dispatch(setActiveChats(result.chats));
+                    console.log('chats6', result.chats);
                     dispatch(setCurrentRoom(null));
                 }
             } catch (error) {
@@ -272,7 +327,7 @@ const ChatPage = () => {
 
         // Add to pending messages
         const pendingMessage = {
-            id: tempId,
+            id: tempId, // Use tempId as the message id for now
             content: message.trim(),
             sender: userId.toString(),
             senderName: 'You',
@@ -292,6 +347,7 @@ const ChatPage = () => {
             message: pendingMessage
         }));
 
+        // Send the message to the server
         chatService.sendMessage(messageData);
         setMessage('');
         setIsTyping(false);
@@ -324,7 +380,7 @@ const ChatPage = () => {
         
         if (!isTyping && currentRoom) {
             // Only emit typing start if not already typing
-            console.log(`Emitting typing start: User ${userId} in room ${currentRoom}`);
+            //console.log(`Emitting typing start: User ${userId} in room ${currentRoom}`);
             setIsTyping(true);
             chatService.emitTyping(currentRoom, userId, true);
         }
@@ -332,7 +388,7 @@ const ChatPage = () => {
         // Always set a new timeout to stop typing indicator
         typingTimeoutRef.current = setTimeout(() => {
             if (isTyping && currentRoom) {
-                console.log(`Emitting typing stop: User ${userId} in room ${currentRoom}`);
+                //console.log(`Emitting typing stop: User ${userId} in room ${currentRoom}`);
                 setIsTyping(false);
                 chatService.emitTyping(currentRoom, userId, false);
             }
@@ -341,16 +397,16 @@ const ChatPage = () => {
 
     const selectChat = async (roomId) => {
         try {
-            console.log(`Selecting chat room ${roomId}`);
+            //console.log(`Selecting chat room ${roomId}`);
             
             // If we're already in a room, leave it first
             if (currentRoom) {
-                console.log(`Leaving current room ${currentRoom}`);
+                //console.log(`Leaving current room ${currentRoom}`);
                 chatService.leaveRoom(currentRoom);
                 
                 // Make sure to stop typing indicator when leaving a room
                 if (isTyping) {
-                    console.log(`Stopping typing in room ${currentRoom} before leaving`);
+                    //console.log(`Stopping typing in room ${currentRoom} before leaving`);
                     setIsTyping(false);
                     chatService.emitTyping(currentRoom, userId, false);
                 }
@@ -362,7 +418,7 @@ const ChatPage = () => {
             // Find the chat and get the other participant's ID
             const selectedChat = activeChats.find(chat => chat._id === roomId);
             if (selectedChat) {
-                console.log(`Selected chat:`, selectedChat);
+                //console.log(`Selected chat:`, selectedChat);
                 const otherParticipant = selectedChat.participants.find(p => p._id !== userId);
                 if (otherParticipant) {
                     // Update the URL with the other participant's ID
@@ -448,11 +504,11 @@ const ChatPage = () => {
     // Log typingUsers state when it changes
     useEffect(() => {
         if (currentRoom && typingUsers[currentRoom]) {
-            console.log('Current typing users:', typingUsers[currentRoom]);
+            //console.log('Current typing users:', typingUsers[currentRoom]);
         }
     }, [typingUsers, currentRoom]);
 
-    console.log('typingUsers', typingUsers[currentRoom]);
+    //console.log('typingUsers', typingUsers[currentRoom]);
 
     return (
         <div className="chat-container">
@@ -605,9 +661,13 @@ const ChatPage = () => {
                                         {/* Messages */}
                                         <div className="messages-container">
                                             <div className="messages-list">
-                                                {Array.isArray(messages[currentRoom]) && messages[currentRoom].map((msg, index) => {
-                                                    if (!msg || !msg.content) return null;
-                                                    
+                                                {Array.isArray(messages[currentRoom]) && 
+                                                  // Filter out duplicate messages by content and sender
+                                                  [...new Map(messages[currentRoom]
+                                                    .filter(msg => msg && msg.content)
+                                                    .map(msg => [msg.id, msg]))
+                                                    .values()]
+                                                    .map((msg, index) => {
                                                     // If this message has a pending state, use that instead
                                                     const pendingMsg = msg.id && pendingMessages[msg.id];
                                                     const messageToShow = pendingMsg || msg;
@@ -617,7 +677,7 @@ const ChatPage = () => {
 
                                                     return (
                                                         <ChatMessage
-                                                            key={messageToShow.id || index}
+                                                            key={`${messageToShow.id || index}-${messageToShow.status || 'sent'}`}
                                                             message={messageToShow}
                                                             isOwnMessage={isOwnMessage}
                                                             onRetry={handleRetry}
@@ -631,8 +691,15 @@ const ChatPage = () => {
                                         {(() => {
                                             const hasTypingUsers = typingUsers[currentRoom] && 
                                                 Object.keys(typingUsers[currentRoom]).length > 0;
-                                            console.log('Has typing users:', hasTypingUsers, typingUsers[currentRoom]);
-                                            return hasTypingUsers && (
+                                            
+                                            // Filter out current user from typing users
+                                            const otherTypingUsers = typingUsers[currentRoom] ? 
+                                                Object.keys(typingUsers[currentRoom]).filter(typingUserId => 
+                                                    typingUserId !== userId.toString()
+                                                ) : [];
+                                            
+                                            // Only show typing indicator if OTHER users are typing
+                                            return otherTypingUsers.length > 0 && (
                                                 <p className="typing-indicator">
                                                     typing
                                                 </p>
@@ -671,6 +738,7 @@ const ChatPage = () => {
                                     </div>
                                 )}
                             </div>
+                            {/* <ActiveChatsIndicator /> */}
                         </>
                     )}
                 </div>

@@ -7,6 +7,7 @@ import { logout } from '../redux/user/actions.js'
 import { logout1 } from '../redux/post/actions.js'
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import ChatNotificationBadge from './chat/ChatNotificationBadge';
 
 const Sidebar = () => {
   const dispatch = useDispatch();
@@ -70,9 +71,10 @@ const Sidebar = () => {
               </div>
             </Nav.Link>
             <Nav.Link as={Link} to="/chat" className="nav-item">
-              <div className='box11'>
+              <div className='box11 position-relative'>
                 <FaComments className="nav-icon" />
                 <h6 className='text5 mb-0'>Chat</h6>
+                <ChatNotificationBadge />
               </div>
             </Nav.Link>
           </Nav>
