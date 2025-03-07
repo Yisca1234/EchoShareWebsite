@@ -11,7 +11,9 @@ import {
     setConnected,
     setTypingUser,
     setActiveChats,
-    setCurrentRoom
+    setCurrentRoom,
+    markRoomAsRead,
+    updateChatUnreadStatus
 } from '../../redux/slices/chatSlice';
 import '../../styles/Chat.css';
 import { isAuthenticated } from '../../redux/auth/selectors';
@@ -74,7 +76,7 @@ const ChatPage = () => {
     useEffect(() => {
         if (!isConnected) return;
         
-        chatService.onReceiveMessage((data) => {
+        const handleNewMessage = (data) => {
             if (!data || !data.content) {
                 console.error('Invalid message data received:', data);
                 return;
@@ -82,9 +84,12 @@ const ChatPage = () => {
 
             const sender = data.sender || {};
             const senderAvatar = sender.avatar || {};
+            const isSelfMessage = sender._id?.toString() === userId.toString();
 
             // If this is a confirmation of our pending message, update its status
             if (data.tempId && pendingMessages[data.tempId]) {
+                //console.log('Updating pending message with server response:', data);
+                
                 const updatedPending = { ...pendingMessages };
                 delete updatedPending[data.tempId];
                 setPendingMessages(updatedPending);
@@ -103,106 +108,202 @@ const ChatPage = () => {
                     },
                     tempId: data.tempId // Add tempId to identify the message to update
                 }));
-            } else {
-                // Only add messages from other users, not our own
-                if (sender._id?.toString() !== userId.toString()) {
-                    // Try to get more complete sender information from the active chats
-                    let senderName = senderAvatar.username || 'Unknown User';
-                    let senderImage = senderAvatar.imageLink || null;
-                    
-                    // Find the chat in active chats
-                    const chat = activeChats.find(c => c._id === data.chat);
-                    if (chat) {
-                        // Find the sender in the participants
-                        const participant = chat.participants.find(p => p._id === sender._id);
-                        if (participant && participant.avatar) {
-                            senderName = participant.avatar.username || senderName;
-                            senderImage = participant.avatar.imageLink || senderImage;
-                        }
-                    }
-                    
-                    // This is a new message from another user
+                
+                // Scroll to bottom after message is updated
+                setTimeout(() => scrollToBottom(), 100);
+            } 
+            // For messages from the current user that don't have a tempId,
+            // check if we already have this message in our state
+            else if (isSelfMessage) {
+                // Try to find a matching message by content and approximate timestamp
+                const existingMessage = messages[data.chat]?.find(msg => 
+                    msg.content === data.content && 
+                    msg.sender === userId.toString() &&
+                    Math.abs(new Date(msg.timestamp) - new Date(data.createdAt)) < 5000
+                );
+                
+                if (existingMessage) {
+                    // Update the existing message with server data
                     dispatch(addMessage({
                         roomId: data.chat,
                         message: {
                             id: data._id,
                             content: data.content,
-                            sender: sender._id?.toString() || '',
-                            senderName: senderName,
-                            senderImage: senderImage,
+                            sender: userId.toString(),
+                            senderName: 'You',
+                            senderImage: senderAvatar.imageLink || null,
+                            timestamp: data.createdAt || new Date().toISOString(),
+                            status: 'sent'
+                        },
+                        tempId: existingMessage.id // Use the existing message ID to update it
+                    }));
+                } else {
+                    // If it doesn't exist, add it
+                    dispatch(addMessage({
+                        roomId: data.chat,
+                        message: {
+                            id: data._id,
+                            content: data.content,
+                            sender: userId.toString(),
+                            senderName: 'You',
+                            senderImage: senderAvatar.imageLink || null,
                             timestamp: data.createdAt || new Date().toISOString(),
                             status: 'sent'
                         }
                     }));
-                    
-                    // If we couldn't get complete sender info, fetch updated chat data
-                    if (senderName === 'Unknown User' && data.chat) {
-                        // Fetch updated chat information to get complete user data
-                        chatService.getChatById(data.chat)
-                            .then(updatedChat => {
-                                if (updatedChat && updatedChat.participants) {
-                                    const updatedSender = updatedChat.participants.find(p => p._id === sender._id);
-                                    if (updatedSender && updatedSender.avatar && updatedSender.avatar.username) {
-                                        // Update the message with the correct sender name
-                                        dispatch(addMessage({
-                                            roomId: data.chat,
-                                            message: {
-                                                id: data._id,
-                                                content: data.content,
-                                                sender: sender._id?.toString() || '',
-                                                senderName: updatedSender.avatar.username,
-                                                senderImage: updatedSender.avatar.imageLink || null,
-                                                timestamp: data.createdAt || new Date().toISOString(),
-                                                status: 'sent'
-                                            },
-                                            tempId: data._id // Use the message ID to update it
-                                        }));
-                                    }
-                                }
-                            })
-                            .catch(err => console.error('Error fetching updated chat data:', err));
-                    }
                 }
             }
-        });
+            // Only add messages from other users
+            else if (!isSelfMessage) {
+                // Try to get more complete sender information from the active chats
+                let senderName = senderAvatar.username || 'Unknown User';
+                let senderImage = senderAvatar.imageLink || null;
+                
+                // Find the chat in active chats
+                const chat = activeChats.find(c => c._id === data.chat);
+                if (chat) {
+                    // Find the sender in the participants
+                    const participant = chat.participants.find(p => p._id === sender._id);
+                    if (participant && participant.avatar) {
+                        senderName = participant.avatar.username || senderName;
+                        senderImage = participant.avatar.imageLink || senderImage;
+                    }
+                }
+                
+                // This is a new message from another user
+                dispatch(addMessage({
+                    roomId: data.chat,
+                    message: {
+                        id: data._id,
+                        content: data.content,
+                        sender: sender._id?.toString() || '',
+                        senderName: senderName,
+                        senderImage: senderImage,
+                        timestamp: data.createdAt || new Date().toISOString(),
+                        status: 'sent'
+                    }
+                }));
+                
+                // If we couldn't get complete sender info, fetch updated chat data
+                if (senderName === 'Unknown User' && data.chat) {
+                    // Fetch updated chat information to get complete user data
+                    chatService.getChatById(data.chat)
+                        .then(updatedChat => {
+                            if (updatedChat && updatedChat.participants) {
+                                const updatedSender = updatedChat.participants.find(p => p._id === sender._id);
+                                if (updatedSender && updatedSender.avatar && updatedSender.avatar.username) {
+                                    // Update the message with the correct sender name
+                                    dispatch(addMessage({
+                                        roomId: data.chat,
+                                        message: {
+                                            id: data._id,
+                                            content: data.content,
+                                            sender: sender._id?.toString() || '',
+                                            senderName: updatedSender.avatar.username,
+                                            senderImage: updatedSender.avatar.imageLink || null,
+                                            timestamp: data.createdAt || new Date().toISOString(),
+                                            status: 'sent'
+                                        },
+                                        tempId: data._id // Use the message ID to update it
+                                    }));
+                                }
+                            }
+                        })
+                        .catch(err => console.error('Error fetching updated chat data:', err));
+                }
+            }
 
-        // Add error handler for failed messages
-        chatService.onMessageError((error) => {
+            // If the message is not from the current user and not in the current room,
+            // mark the chat as having unread messages
+            if (!isSelfMessage && data.chat !== currentRoom) {
+                console.log(`Marking chat ${data.chat} as unread`);
+                dispatch(updateChatUnreadStatus({ roomId: data.chat, hasUnread: true }));
+                
+                // Also update the chat in activeChats directly to ensure the UI updates
+                const updatedChats = activeChats.map(chat => 
+                    chat._id === data.chat 
+                        ? { ...chat, hasUnread: true } 
+                        : chat
+                );
+                dispatch(setActiveChats(updatedChats));
+            }
+        };
+
+        const handleMessageError = (error) => {
             if (error.tempId && pendingMessages[error.tempId]) {
                 const updatedPending = { ...pendingMessages };
                 updatedPending[error.tempId].status = 'failed';
                 setPendingMessages(updatedPending);
             }
-        });
+        };
 
-        chatService.onChatUpdated((updatedChat) => {
+        const handleUserTyping = ({ roomId, userId, isTyping }) => {
+            dispatch(setTypingUser({ roomId, userId, isTyping }));
+        };
+
+        const handleChatUpdated = (updatedChat) => {
             if (!updatedChat || !updatedChat._id) {
                 console.error('Invalid chat update received:', updatedChat);
                 return;
             }
-            //console.log('updatedChat');
-            // Create a new array with the updated chat
-            const updatedChats = activeChats.map(chat => 
-                chat._id === updatedChat._id ? updatedChat : chat
-            ).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-
+            
+            console.log('Chat update received:', updatedChat);
+            console.log('Has unread property:', updatedChat.hasUnread);
+            
+            // Find the chat in our current list
+            const existingChatIndex = activeChats.findIndex(c => c._id === updatedChat._id);
+            
+            // Create a new array to avoid mutating state directly
+            const updatedChats = [...activeChats];
+            
+            if (existingChatIndex !== -1) {
+                // Determine if the chat should be marked as unread
+                const shouldBeUnread = updatedChat._id !== currentRoom && updatedChat.hasUnread === true;
+                
+                // Update existing chat
+                updatedChats[existingChatIndex] = {
+                    ...updatedChats[existingChatIndex],
+                    ...updatedChat,
+                    // Set hasUnread based on whether this is the current room and the updatedChat's hasUnread property
+                    hasUnread: shouldBeUnread
+                };
+                console.log('Updated chat hasUnread:', updatedChats[existingChatIndex].hasUnread);
+            } else {
+                // Add new chat with hasUnread property preserved
+                updatedChats.push({
+                    ...updatedChat,
+                    hasUnread: updatedChat._id !== currentRoom && updatedChat.hasUnread === true
+                });
+            }
+            
+            // Sort chats by last message timestamp
+            updatedChats.sort((a, b) => {
+                const aTime = a.lastMessage?.timestamp || a.updatedAt || a.createdAt;
+                const bTime = b.lastMessage?.timestamp || b.updatedAt || b.createdAt;
+                return new Date(bTime) - new Date(aTime);
+            });
+            
             dispatch(setActiveChats(updatedChats));
-            console.log('chats2', updatedChats);
+        };
 
-        });
+        const handleMessagesRead = (data) => {
+            dispatch(markRoomAsRead(data.roomId));
+        };
 
-        chatService.onTyping(({ roomId, userId, isTyping }) => {
-            //console.log(`Received typing event: User ${userId} is ${isTyping ? 'typing' : 'stopped typing'} in room ${roomId}`);
-            dispatch(setTypingUser({ roomId, userId, isTyping }));
-        });
+        chatService.onReceiveMessage(handleNewMessage);
+        chatService.onMessageError(handleMessageError);
+        chatService.onTyping(handleUserTyping);
+        chatService.onChatUpdated(handleChatUpdated);
+        chatService.onMessagesRead(handleMessagesRead);
 
         return () => {
             chatService.offReceiveMessage();
             chatService.offMessageError();
-            chatService.offChatUpdated();
             chatService.offTyping();
+            chatService.offChatUpdated();
+            chatService.offMessagesRead();
         };
-    }, [isConnected, pendingMessages, userId]);
+    }, [isConnected, currentRoom, userId]);
 
     // Handle scrolling
     useEffect(() => {
@@ -243,7 +344,7 @@ const ChatPage = () => {
                 }));
 
                 dispatch(setActiveChats(chatsWithLastMessage));
-                console.log('chats3', chatsWithLastMessage);
+                //console.log('chats3', chatsWithLastMessage);
                 setInitialized(true);
             } catch (error) {
                 console.error('Error fetching chats:', error);
@@ -255,7 +356,7 @@ const ChatPage = () => {
         // Reset state when component mounts or token changes
         if (!token) {
             dispatch(setActiveChats([]));
-            console.log('chats4', []);
+            //console.log('chats4', []);
             setInitialized(false);
             return;
         }
@@ -273,7 +374,7 @@ const ChatPage = () => {
                 
                 // Only try to create/select chat if channelId is provided
                 if (channelId) {
-                    //console.log(1);
+                    ////console.log(1);
                     const existingChat = activeChats.find(chat => 
                         chat.participants.some(p => p._id === channelId)
                     );
@@ -282,13 +383,13 @@ const ChatPage = () => {
                         await selectChat(existingChat._id);
                     } else {
                         const result = await chatService.createRoom(channelId);
-                        //console.log(result);
+                        ////console.log(result);
                         if (result) {
                             // Update active chats with the new chat
                             const updatedChats = activeChats.concat(result.chats);
-                            //console.log(updatedChats);
+                            ////console.log(updatedChats);
                             dispatch(setActiveChats(updatedChats));
-                            console.log('chats5', updatedChats);
+                            //console.log('chats5', updatedChats);
                             await selectChat(result.roomId);
                         }
                     }
@@ -298,7 +399,7 @@ const ChatPage = () => {
                     const result = await chatService.createRoom('111');
                     
                     dispatch(setActiveChats(result.chats));
-                    console.log('chats6', result.chats);
+                    //console.log('chats6', result.chats);
                     dispatch(setCurrentRoom(null));
                 }
             } catch (error) {
@@ -324,6 +425,8 @@ const ChatPage = () => {
             timestamp,
             tempId
         };
+
+        //console.log(`Sending message with tempId ${tempId}:`, messageData);
 
         // Add to pending messages
         const pendingMessage = {
@@ -351,6 +454,9 @@ const ChatPage = () => {
         chatService.sendMessage(messageData);
         setMessage('');
         setIsTyping(false);
+        
+        // Scroll to bottom after sending a message
+        setTimeout(() => scrollToBottom(), 100);
     };
 
     const handleRetry = (failedMessage) => {
@@ -380,7 +486,7 @@ const ChatPage = () => {
         
         if (!isTyping && currentRoom) {
             // Only emit typing start if not already typing
-            //console.log(`Emitting typing start: User ${userId} in room ${currentRoom}`);
+            ////console.log(`Emitting typing start: User ${userId} in room ${currentRoom}`);
             setIsTyping(true);
             chatService.emitTyping(currentRoom, userId, true);
         }
@@ -388,7 +494,7 @@ const ChatPage = () => {
         // Always set a new timeout to stop typing indicator
         typingTimeoutRef.current = setTimeout(() => {
             if (isTyping && currentRoom) {
-                //console.log(`Emitting typing stop: User ${userId} in room ${currentRoom}`);
+                ////console.log(`Emitting typing stop: User ${userId} in room ${currentRoom}`);
                 setIsTyping(false);
                 chatService.emitTyping(currentRoom, userId, false);
             }
@@ -397,16 +503,16 @@ const ChatPage = () => {
 
     const selectChat = async (roomId) => {
         try {
-            //console.log(`Selecting chat room ${roomId}`);
+            ////console.log(`Selecting chat room ${roomId}`);
             
             // If we're already in a room, leave it first
             if (currentRoom) {
-                //console.log(`Leaving current room ${currentRoom}`);
+                ////console.log(`Leaving current room ${currentRoom}`);
                 chatService.leaveRoom(currentRoom);
                 
                 // Make sure to stop typing indicator when leaving a room
                 if (isTyping) {
-                    //console.log(`Stopping typing in room ${currentRoom} before leaving`);
+                    ////console.log(`Stopping typing in room ${currentRoom} before leaving`);
                     setIsTyping(false);
                     chatService.emitTyping(currentRoom, userId, false);
                 }
@@ -414,11 +520,20 @@ const ChatPage = () => {
             
             chatService.joinRoom(roomId);
             dispatch(setCurrentRoom(roomId));
+            dispatch(markRoomAsRead(roomId));
+            
+            // Also update the chat in activeChats directly to ensure the UI updates
+            const updatedChats = activeChats.map(chat => 
+                chat._id === roomId 
+                    ? { ...chat, hasUnread: false } 
+                    : chat
+            );
+            dispatch(setActiveChats(updatedChats));
             
             // Find the chat and get the other participant's ID
             const selectedChat = activeChats.find(chat => chat._id === roomId);
             if (selectedChat) {
-                //console.log(`Selected chat:`, selectedChat);
+                ////console.log(`Selected chat:`, selectedChat);
                 const otherParticipant = selectedChat.participants.find(p => p._id !== userId);
                 if (otherParticipant) {
                     // Update the URL with the other participant's ID
@@ -504,11 +619,11 @@ const ChatPage = () => {
     // Log typingUsers state when it changes
     useEffect(() => {
         if (currentRoom && typingUsers[currentRoom]) {
-            //console.log('Current typing users:', typingUsers[currentRoom]);
+            ////console.log('Current typing users:', typingUsers[currentRoom]);
         }
     }, [typingUsers, currentRoom]);
 
-    //console.log('typingUsers', typingUsers[currentRoom]);
+    ////console.log('typingUsers', typingUsers[currentRoom]);
 
     return (
         <div className="chat-container">
@@ -564,11 +679,16 @@ const ChatPage = () => {
                                     ) : (
                                         filteredChats.map((chat) => {
                                             const otherParticipant = getOtherParticipant(chat);
+                                            console.log(`Chat ${chat._id} hasUnread:`, chat.hasUnread);
+                                            
+                                            // Ensure hasUnread is a boolean
+                                            const isUnread = chat.hasUnread === true;
+                                            
                                             return (
                                                 <div
                                                     key={chat._id}
                                                     onClick={() => selectChat(chat._id)}
-                                                    className={`chat-item ${currentRoom === chat._id ? 'active' : ''}`}
+                                                    className={`chat-item ${currentRoom === chat._id ? 'active' : ''} ${isUnread ? 'unread' : ''}`}
                                                 >
                                                     <div className="chat-item-content">
                                                         <div 
@@ -641,7 +761,7 @@ const ChatPage = () => {
                                                                 {/* {(() => {
                                                                     const hasTypingUsers = typingUsers[currentRoom] && 
                                                                         Object.keys(typingUsers[currentRoom]).length > 0;
-                                                                    console.log('Has typing users:', hasTypingUsers, typingUsers[currentRoom]);
+                                                                    //console.log('Has typing users:', hasTypingUsers, typingUsers[currentRoom]);
                                                                     return hasTypingUsers && (
                                                                         <p className="typing-indicator">
                                                                             {otherParticipant?.username || 'Someone'} is typing
@@ -662,11 +782,12 @@ const ChatPage = () => {
                                         <div className="messages-container">
                                             <div className="messages-list">
                                                 {Array.isArray(messages[currentRoom]) && 
-                                                  // Filter out duplicate messages by content and sender
+                                                  // Filter out duplicate messages by ID first, then by content+sender+timestamp
                                                   [...new Map(messages[currentRoom]
                                                     .filter(msg => msg && msg.content)
                                                     .map(msg => [msg.id, msg]))
                                                     .values()]
+                                                    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
                                                     .map((msg, index) => {
                                                     // If this message has a pending state, use that instead
                                                     const pendingMsg = msg.id && pendingMessages[msg.id];

@@ -20,11 +20,11 @@ const ChannelPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const channelsdata = useSelector(channels);
-  console.log(channelsdata);
+  //console.log(channelsdata);
 
   const authenticated = useSelector(isAuthenticated);
   useEffect(() => {
-    // console.log(id);
+    // //console.log(id);
     if(!authenticated){
       navigate('/');
     }

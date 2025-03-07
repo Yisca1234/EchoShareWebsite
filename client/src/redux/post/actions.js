@@ -77,13 +77,13 @@ export const handlePostLike = (postId, userId, pressLike) => async (dispatch) =>
       await dispatch(handleBookmarkChanges(userId, postId, 'like'));
     }
     else {
-      console.log('unlike');
+      //console.log('unlike');
       await dispatch(postRemoveLike(postId, userId));
       await dispatch(handleBookmarkChanges(userId, postId, 'unlike'));
 
     }
   } else {
-    console.log('error');
+    //console.log('error');
   }
 
 }
@@ -93,7 +93,7 @@ export const handleView = (viewedPosts, userId) => async (dispatch) =>{
   const response = await apiClient.put('/post/view', { viewedPosts, userId });
   const updatedArray = response.data.viewedPosts;
   if(updatedArray.length<viewedPosts.length){
-    console.log('didnt increment view all the posts ');
+    //console.log('didnt increment view all the posts ');
   }
   if(updatedArray.length>0){
     await dispatch(view_success(updatedArray, userId));

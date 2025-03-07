@@ -5,9 +5,9 @@ const User = require('../models/user');
 
 // Create a new chat (one-on-one or group)
 // const createChat = async (req, res) => {
-//     console.log('here-controller');
+//     //console.log('here-controller');
 //     try {
-//         console.log(name, participants, isGroupChat);
+//         //console.log(name, participants, isGroupChat);
 //         const { name, participants, isGroupChat } = req.body;
         
 //         if (!participants || participants.length < 1) {
@@ -49,7 +49,7 @@ const User = require('../models/user');
 
 // Get all chats for current user
 const getUserChats = async (req, res) => {
-    // console.log(req.user._id);
+    // //console.log(req.user._id);
     const userId = req.header('userId');
     try {
         const chats = await Chat.find({ participants: userId })
@@ -189,7 +189,7 @@ const createRoom = async (req, res) => {
 
 
         // Get channel details
-        //console.log('userId', userId);
+        ////console.log('userId', userId);
         let newChat;
         if(channelId !== '111') {
             const existingChat = await Chat.findOne({

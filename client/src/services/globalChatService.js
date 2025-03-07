@@ -23,7 +23,7 @@ class GlobalChatService {
 
     connect(token, userId) {
         if (this.socket && this.socket.connected) {
-            console.log('Socket already connected');
+            //console.log('Socket already connected');
             return;
         }
 
@@ -31,7 +31,7 @@ class GlobalChatService {
             ? 'http://localhost:5000' 
             : 'https://app.echo-share.click';
             
-        console.log(`Connecting to socket server at ${socketUrl} with userId ${userId}`);
+        //console.log(`Connecting to socket server at ${socketUrl} with userId ${userId}`);
         
         this.socket = io(socketUrl, {
             auth: { token },
@@ -51,7 +51,7 @@ class GlobalChatService {
         if (!this.socket) return;
 
         this.socket.on('connect', () => {
-            console.log('Connected to chat server with socket ID:', this.socket.id);
+            //console.log('Connected to chat server with socket ID:', this.socket.id);
             store.dispatch(setConnected(true));
             
             // Reset reconnect attempts on successful connection
@@ -71,7 +71,7 @@ class GlobalChatService {
         });
 
         this.socket.on('disconnect', (reason) => {
-            console.log('Disconnected from chat server:', reason);
+            //console.log('Disconnected from chat server:', reason);
             store.dispatch(setConnected(false));
             
             // If the disconnection was initiated by the server, try to reconnect
@@ -95,13 +95,13 @@ class GlobalChatService {
         this.reconnectAttempts++;
         
         if (this.reconnectAttempts <= this.maxReconnectAttempts) {
-            console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+            //console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
             
             // Exponential backoff for reconnect
             const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
             
             this.reconnectTimeout = setTimeout(() => {
-                console.log(`Reconnecting after ${delay}ms delay...`);
+                //console.log(`Reconnecting after ${delay}ms delay...`);
                 this.socket.connect();
             }, delay);
         } else {
@@ -120,7 +120,7 @@ class GlobalChatService {
 
         // Listen for chat updates
         this.socket.on('chat_updated', (updatedChat) => {
-            console.log('Chat updated:', updatedChat);
+            //console.log('Chat updated:', updatedChat);
             this.fetchAndUpdateChats();
         });
 
@@ -137,7 +137,7 @@ class GlobalChatService {
             return;
         }
 
-        console.log('Received message:', data);
+        //console.log('Received message:', data);
 
         const sender = data.sender || {};
         const senderAvatar = sender.avatar || {};
@@ -179,7 +179,7 @@ class GlobalChatService {
     }
 
     handleTypingEvent({ roomId, userId, isTyping, username }) {
-        console.log(`Typing event: User ${username || userId} is ${isTyping ? 'typing' : 'stopped typing'} in room ${roomId}`);
+        //console.log(`Typing event: User ${username || userId} is ${isTyping ? 'typing' : 'stopped typing'} in room ${roomId}`);
         store.dispatch(setTypingUser({ roomId, userId, isTyping }));
         
         // Notify any registered typing handlers for this room
@@ -199,11 +199,11 @@ class GlobalChatService {
                 return;
             }
             
-            console.log(`Fetched ${chats.length} chats`);
+            //console.log(`Fetched ${chats.length} chats`);
             
             // Update Redux store with chats
             store.dispatch(setActiveChats(chats));
-            console.log('chats1', chats);
+            //console.log('chats1', chats);
             
             // Join all chat rooms
             chats.forEach(chat => {
@@ -229,7 +229,7 @@ class GlobalChatService {
         
         // Only join if not already in the room
         if (!this.activeRooms.has(roomId)) {
-            // console.log(`Joining room ${roomId} with socket ID ${this.socket.id}`);
+            // //console.log(`Joining room ${roomId} with socket ID ${this.socket.id}`);
             this.socket.emit('join_room', roomId);
             this.activeRooms.add(roomId);
         }
@@ -239,7 +239,7 @@ class GlobalChatService {
         if (!this.socket || !roomId) return;
         
         if (this.activeRooms.has(roomId)) {
-            console.log(`Leaving room ${roomId} with socket ID ${this.socket.id}`);
+            //console.log(`Leaving room ${roomId} with socket ID ${this.socket.id}`);
             this.socket.emit('leave_room', roomId);
             this.activeRooms.delete(roomId);
             

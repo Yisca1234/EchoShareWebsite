@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 const authenticate = async (req, res, next) => {
-    console.log('here-server');
+    //console.log('here-server');
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
         

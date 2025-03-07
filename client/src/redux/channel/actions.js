@@ -30,7 +30,7 @@ export const getChannels = (userId) => async (dispatch) =>{
 
 // get the details and posts of a channel to channelpage
 export const getChannel = (channelId) => async (dispatch) =>{
-  console.log('channelId', channelId);
+  //console.log('channelId', channelId);
   try{
     const response = await apiClient.get(`/channel/${channelId}`);
     await dispatch(getChannelSuccess(response.data.channel, channelId));

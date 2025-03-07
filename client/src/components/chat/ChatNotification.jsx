@@ -168,8 +168,15 @@ const ChatNotification = () => {
     const handleNotificationClick = (notification) => {
         if (!notification) return;
         
-        // Navigate to the chat page with the room ID
-        navigate(`/chat?channelId=${notification.roomId}`);
+        // Find the chat room
+        const chatRoom = activeChats.find(chat => chat._id === notification.roomId);
+        if (!chatRoom) {
+            console.error('Chat room not found:', notification.roomId);
+            return;
+        }
+        
+        // Navigate directly to the chat page and select the room
+        navigate('/chat');
         
         // Clear notifications for this room
         dispatch(clearNotifications(notification.roomId));
@@ -184,6 +191,15 @@ const ChatNotification = () => {
         setActiveNotifications(prev => 
             prev.filter(notif => notif.id !== notification.id)
         );
+        
+        // Use a small timeout to ensure the chat page is loaded before selecting the room
+        setTimeout(() => {
+            // Dispatch action to select the room directly
+            const chatService = require('../../services/chatService').default;
+            chatService.joinRoom(notification.roomId);
+            dispatch({ type: 'chat/setCurrentRoom', payload: notification.roomId });
+            dispatch({ type: 'chat/markRoomAsRead', payload: notification.roomId });
+        }, 100);
     };
 
     // If no active notifications or desktop notifications are disabled, don't render anything

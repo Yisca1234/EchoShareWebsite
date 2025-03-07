@@ -3,7 +3,7 @@ const User = require('../models/user');
 
 const getChannel = async (req, res) => {
   const { channelId } = req.params;
-  // console.log(channelId);
+  // //console.log(channelId);
   try {
     // Find user by ID and populate Followers and Posts
     const channel = await User.findById(channelId)

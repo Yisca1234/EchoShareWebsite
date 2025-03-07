@@ -12,7 +12,7 @@ class ChatService {
         const socketUrl = process.env.NODE_ENV === 'development' 
             ? 'http://localhost:5000' 
             : 'https://app.echo-share.click';
-        console.log(`Connecting to socket server at ${socketUrl} with userId ${userId}`);
+        //console.log(`Connecting to socket server at ${socketUrl} with userId ${userId}`);
         this.socket = io(socketUrl, {
             auth: {
                 token
@@ -23,7 +23,7 @@ class ChatService {
         });
 
         this.socket.on('connect', () => {
-            console.log('Connected to chat server with socket ID:', this.socket.id);
+            //console.log('Connected to chat server with socket ID:', this.socket.id);
         });
 
         this.socket.on('connect_error', (err) => {
@@ -62,6 +62,16 @@ class ChatService {
         this.socket.off('receive_message');
     }
 
+    onMessagesRead(callback) {
+        if (!this.socket) return;
+        this.socket.on('messages_read', callback);
+    }
+
+    offMessagesRead() {
+        if (!this.socket) return;
+        this.socket.off('messages_read');
+    }
+
     onChatUpdated(callback) {
         if (!this.socket) return;
         this.socket.on('chat_updated', callback);
@@ -74,19 +84,19 @@ class ChatService {
 
     joinRoom(roomId) {
         if (!this.socket) return;
-        console.log(`Joining room ${roomId} with socket ID ${this.socket.id}`);
+        //console.log(`Joining room ${roomId} with socket ID ${this.socket.id}`);
         this.socket.emit('join_room', roomId);
     }
 
     leaveRoom(roomId) {
         if (!this.socket) return;
-        console.log(`Leaving room ${roomId} with socket ID ${this.socket.id}`);
+        //console.log(`Leaving room ${roomId} with socket ID ${this.socket.id}`);
         this.socket.emit('leave_room', roomId);
     }
 
     onTyping(callback) {
         if (!this.socket) return;
-        console.log('Registering typing event listener');
+        //console.log('Registering typing event listener');
         this.socket.on('user_typing', (data) => {
             // Only notify about other users typing, not the current user
             const currentUserId = sessionStorage.getItem('userId');
@@ -98,13 +108,13 @@ class ChatService {
 
     offTyping() {
         if (!this.socket) return;
-        console.log('Removing typing event listener');
+        //console.log('Removing typing event listener');
         this.socket.off('user_typing');
     }
 
     emitTyping(roomId, userId, isTyping = true) {
         if (!this.socket) return;
-        console.log(`Emitting typing event: User ${userId} is ${isTyping ? 'typing' : 'stopped typing'} in room ${roomId}`);
+        //console.log(`Emitting typing event: User ${userId} is ${isTyping ? 'typing' : 'stopped typing'} in room ${roomId}`);
         this.socket.emit('typing', { roomId, userId, isTyping });
     }
 

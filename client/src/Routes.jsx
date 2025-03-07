@@ -18,7 +18,8 @@ import { change_of_following } from './redux/post/actions.js'
 import { useSelector, useDispatch } from 'react-redux';
 import { getUserfollowing } from './redux/user/selectors.js'
 import isEqual from 'lodash/isEqual';
-
+import ResetPassword from './components/ResetPassword.jsx';
+import ConfirmationResetPage from './components/ConfirmationResetPage.jsx';
 
 
 const AppRoutes = () => {
@@ -63,6 +64,8 @@ const AppRoutes = () => {
           <Route path="/" element={isMobile ? <Navigate to="/mobile-screen" /> : <Navigate to="/login" />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/confirmation-reset" element={<ConfirmationResetPage />} />
           <Route path="/home" element={<Home />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/chat" element={<ChatPage />} />

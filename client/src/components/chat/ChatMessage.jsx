@@ -6,7 +6,7 @@ import '../../styles/Chat.css';
 
 const ChatMessage = ({ message, isOwnMessage, onRetry }) => {
     const cloud_name = "dojexlq8y";
-    // console.log(message);
+    // //console.log(message);
 
     const getMessageStatusIcon = () => {
         if (message.status === 'pending') {

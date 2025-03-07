@@ -36,7 +36,7 @@ const ChatConnectionProvider = ({ children }) => {
     // Connect to chat server if not already connected
     const token = sessionStorage.getItem('jwtToken');
     if (token && !connectionInitialized) {
-      console.log('Initializing global chat connection');
+      //console.log('Initializing global chat connection');
       
       // Initialize chat connection
       globalChatService.connect(token, userId);
@@ -59,12 +59,12 @@ const ChatConnectionProvider = ({ children }) => {
   // Handle reconnection if connection fails
   useEffect(() => {
     if (authenticated && userId && !isConnected && connectionInitialized) {
-      console.log('Connection lost, attempting to reconnect...');
+      //console.log('Connection lost, attempting to reconnect...');
       
       // Retry connection if failed
       if (connectionAttempts.current < maxConnectionAttempts) {
         connectionAttempts.current += 1;
-        console.log(`Retrying connection (attempt ${connectionAttempts.current}/${maxConnectionAttempts})`);
+        //console.log(`Retrying connection (attempt ${connectionAttempts.current}/${maxConnectionAttempts})`);
         
         // Reset connection initialized flag to trigger reconnection after a delay
         reconnectTimeoutRef.current = setTimeout(() => {
@@ -77,7 +77,7 @@ const ChatConnectionProvider = ({ children }) => {
   // Fetch active chats when connected
   useEffect(() => {
     if (isConnected && authenticated && userId) {
-      console.log('Fetching active chats from global provider');
+      //console.log('Fetching active chats from global provider');
       
       // Fetch active chats
       globalChatService.fetchAndUpdateChats();

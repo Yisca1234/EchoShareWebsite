@@ -102,7 +102,7 @@ const userReducer = (state = initialState, action) => {
     
     case BOOKMARK_LIKE_SUCCESS: {
       const {userId, postId} = action.payload;
-      console.log(userId, postId);
+      //console.log(userId, postId);
 
       const updateduser = {
         ...state.user,

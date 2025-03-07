@@ -70,7 +70,7 @@ const Post = ({ post, incrementView, isChannelpage }) => {
 
   const cloud_name = "dojexlq8y"
   const {text, img, likes, comments, qoutes, views} = data;
-  //console.log(likes);
+  ////console.log(likes);
   let profileImage, username, imageLink, avatar;
   if( user !== null){
     avatar = user.avatar;
@@ -118,7 +118,7 @@ const Post = ({ post, incrementView, isChannelpage }) => {
         break;
       }
       default: {
-        console.log('Unknown button');
+        //console.log('Unknown button');
         break;
       }
     }
@@ -141,7 +141,7 @@ const Post = ({ post, incrementView, isChannelpage }) => {
     setLoading((pre) => {
       const updated = [...pre];
       updated[index] = state;
-      // console.log(updated);
+      // //console.log(updated);
       return updated;
     });
   }

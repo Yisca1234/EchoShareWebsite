@@ -43,11 +43,13 @@ const chatSlice = createSlice({
                 // Updating an existing message (after server confirmation)
                 const index = state.messages[roomId].findIndex(msg => msg.id === tempId);
                 if (index !== -1) {
+                    //console.log(`Updating message with tempId ${tempId} to server ID ${message.id}`);
                     // Replace the pending message with the confirmed one
                     state.messages[roomId][index] = {
                         ...state.messages[roomId][index], // Keep existing properties
                         ...message, // Override with new properties
-                        id: message.id || tempId // Ensure we have an ID
+                        id: message.id || tempId, // Ensure we have an ID
+                        status: message.status || 'sent' // Ensure we have a status
                     };
                 } else {
                     // If for some reason we can't find the message to update, add it
@@ -57,10 +59,14 @@ const chatSlice = createSlice({
             } else {
                 // Check if this message already exists to prevent duplicates
                 const existingIndex = state.messages[roomId].findIndex(
-                    msg => msg.id === message.id || 
-                          (msg.content === message.content && 
-                           msg.sender === message.sender && 
-                           msg.timestamp === message.timestamp)
+                    msg => 
+                        // Check by ID first
+                        (message.id && msg.id === message.id) || 
+                        // Then check by content, sender and approximate timestamp
+                        (msg.content === message.content && 
+                         msg.sender === message.sender && 
+                         // Compare timestamps with some tolerance for slight differences
+                         (Math.abs(new Date(msg.timestamp) - new Date(message.timestamp)) < 5000))
                 );
                 
                 if (existingIndex === -1) {
@@ -80,8 +86,10 @@ const chatSlice = createSlice({
                     state.messages[roomId][existingIndex] = {
                         ...state.messages[roomId][existingIndex],
                         ...message,
-                        // Keep the original ID
-                        id: state.messages[roomId][existingIndex].id
+                        // Keep the original ID if the new message doesn't have one
+                        id: message.id || state.messages[roomId][existingIndex].id,
+                        // Update status if provided
+                        status: message.status || state.messages[roomId][existingIndex].status || 'sent'
                     };
                 }
             }
@@ -138,6 +146,13 @@ const chatSlice = createSlice({
                     const lastMessage = state.messages[roomId][state.messages[roomId].length - 1];
                     state.lastSeenMessages[roomId] = lastMessage.id;
                 }
+                
+                // Mark the chat as read in the activeChats array
+                const chatIndex = state.activeChats.findIndex(chat => chat._id === roomId);
+                if (chatIndex !== -1) {
+                    console.log(`Marking chat ${roomId} as read in Redux state`);
+                    state.activeChats[chatIndex].hasUnread = false;
+                }
             }
         },
         setActiveChats: (state, action) => {
@@ -193,6 +208,13 @@ const chatSlice = createSlice({
                 state.unreadCounts = {};
                 state.lastSeenMessages = {};
             }
+        },
+        updateChatUnreadStatus: (state, action) => {
+            const { roomId, hasUnread } = action.payload;
+            const chatIndex = state.activeChats.findIndex(chat => chat._id === roomId);
+            if (chatIndex !== -1) {
+                state.activeChats[chatIndex].hasUnread = hasUnread;
+            }
         }
     }
 });
@@ -208,7 +230,8 @@ export const {
     setCurrentRoom,
     setTypingUser,
     updateNotificationSettings,
-    clearChat
+    clearChat,
+    updateChatUnreadStatus
 } = chatSlice.actions;
 
 // Selectors

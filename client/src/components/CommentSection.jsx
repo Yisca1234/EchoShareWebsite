@@ -33,7 +33,7 @@ const CommentSection = ({postId}) => {
         const comment = { text: newComment };
         await dispatch(handleCreateComment(postId, comment, userId));
         setNewComment('');
-        console.log('comment created');
+        //console.log('comment created');
       } catch (error) {
         console.error("Error sending comment:", error);
       } finally {

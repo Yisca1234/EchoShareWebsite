@@ -16,6 +16,19 @@ const authSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    confirmationToken: {
+      type: String,
+      required: false,
+    },
+    expirationToken: {
+      type: Date,
+      required: false,
+    },
+    tempPasswordHash: {
+      type: String,
+      required: false,
+    },
+    
   },  
   {
     timestamps: true,

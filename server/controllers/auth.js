@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 const Auth = require('../models/auth');
 const User = require('../models/user');
 const { SECRET } = require('../utils/config');
@@ -139,7 +141,7 @@ const signupUser = async (req, res) => {
   } catch (err) {
     await session.abortTransaction();
     session.endSession();
-    console.log(err);
+    //console.log(err);
     return res.status(500).send({ message: 'Server error', error: err });
   }
 };
@@ -156,4 +158,84 @@ const getSignature = async (req, res) => {
   res.json({ timestamp, signature });
 }
 
-module.exports = { loginUser, signupUser, getSignature };
+const requestPasswordReset = async (req, res) => {
+  const { email, newPassword } = req.body;
+  const lowerCaseEmail = email.toLowerCase();
+  const auth = await Auth.findOne({
+    userEmail: lowerCaseEmail,
+  });
+  if (!auth) {
+    return res.status(404).send({ message: 'User not found' });
+  }
+
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).send({ message: 'Password needs to be atleast 6 characters long.' });
+  }
+
+  const saltRounds = 10;
+  const tempPasswordHash = await bcrypt.hash(newPassword, saltRounds);
+  const confirmationToken = crypto.randomBytes(32).toString("hex");
+  const expiration = new Date(Date.now() + 3600000);
+
+  auth.tempPasswordHash = tempPasswordHash;
+  auth.confirmationToken = confirmationToken;
+  auth.expirationToken = expiration;
+  await auth.save();
+
+
+  const resetLink = `${process.env.NODE_ENV === 'development' ? 'http://localhost:5173' : 'https://app.echo-share.click'}/confirmation-reset?token=${confirmationToken}`;
+
+  const transporter = await nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'echoshareweb@gmail.com', // Your Gmail address
+      pass: 'wuof hnqe shvf blbe' 
+    }
+  });
+  
+  const emailOptions = {
+    from: 'echoshareweb@gmail.com',
+    to: email,
+    subject: 'Password Reset Confirmation',  
+    html: `
+      <p>Hello,</p>
+      <p>You are receiving this email because you have requested a password reset for your account.</p>
+      <p>Please click the link below to confirm the reset of your password:</p>
+      <a href="${resetLink}">Confirm Password Reset</a>
+      <p>If you did not request a password reset, please ignore this email.</p>
+      <p>Thanks,</p>
+      <p>The EchoShare Team</p>
+    `
+  };
+
+  await transporter.sendMail(emailOptions);
+
+  res.status(200).send({ message: 'Password reset email has been sent. Please check your inbox.' });
+
+}
+
+
+const resetPassword = async (req, res) => {
+  const token = req.query.token;
+
+  console.log(token);
+  const auth = await Auth.findOne({
+    confirmationToken: token,
+    expirationToken: { $gt: new Date() },
+  });
+  if (!auth) {
+    return res.status(404).send({ message: 'Invalid or expired token' });
+  }
+
+
+  auth.passwordHash = auth.tempPasswordHash;
+  auth.tempPasswordHash = null;
+  auth.confirmationToken = null;
+  auth.expirationToken = null;
+  await auth.save();
+
+  res.status(200).send({ message: 'Your password has been successfully updated. You can now log in.' });
+}
+
+
+module.exports = { loginUser, signupUser, getSignature, requestPasswordReset, resetPassword };

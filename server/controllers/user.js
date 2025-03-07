@@ -270,7 +270,7 @@ const handleBookmark = async (req, res) => {
 
 const getSearchResults = async (req, res) => {
   const { userId, query } = req.params;
-  // console.log(query);
+  // //console.log(query);
   try {
     const channels = await User.find({
       'avatar.username': { $regex: new RegExp(query, 'i') },

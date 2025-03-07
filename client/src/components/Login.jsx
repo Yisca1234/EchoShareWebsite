@@ -27,14 +27,14 @@ const Login = () => {
   const userId = useSelector(getUserId);
 
   useEffect(() => {
-    // console.log(authenticated, avatarExists);
+    // //console.log(authenticated, avatarExists);
     const userConnected = async () => {
-      // console.log(authenticated, avatarExists, token, userId);
+      // //console.log(authenticated, avatarExists, token, userId);
       if (authenticated && avatarExists && token && userId) {
-        // console.log('bbbconnected'); 
+        // //console.log('bbbconnected'); 
         await sessionStorage.setItem('jwtToken', token);
         await sessionStorage.setItem('userId', userId);
-        // console.log('connected'); 
+        // //console.log('connected'); 
         navigate('/home');
       }
     }
@@ -106,6 +106,12 @@ const Login = () => {
               <small>
                 Don't have an account?{' '}
                 <Link to="/signup">Sign up here</Link>
+              </small>
+            </div>
+            <div className="text-center mt-3">
+              <small>
+                Forgot your password?{' '}
+                <Link to="/reset-password">Reset password here</Link>
               </small>
             </div>
           </Form>

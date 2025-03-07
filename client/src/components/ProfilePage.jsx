@@ -81,13 +81,13 @@ const Profile = () => {
         description: e.target.elements['description'].value,
         phone: e.target.elements['phone'].value,
       }
-      console.log(formData);
+      //console.log(formData);
       //debugger
       
       await dispatch(createAvatar(formData, userId));
       setModelShow(false);
     } catch (e){
-      console.log(e);
+      //console.log(e);
       navigate('/home');
     }
   }
