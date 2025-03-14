@@ -15,7 +15,7 @@ try {
 
    // Commit changes to Git
    //console.log('Committing changes...');
-   execSync('git commit -m "liveChat1.4 & reset password"', { stdio: 'inherit' });
+   execSync('git commit -m "liveChat1.5 & reset password"', { stdio: 'inherit' });
 
    // Push changes to the repository
    //console.log('Pushing changes to the repository...');
