@@ -59,7 +59,7 @@ class GlobalChatService {
             
             // Join all active rooms
             this.joinActiveRooms();
-            
+            console.log(1);
             // Fetch chats after connection
             this.fetchAndUpdateChats();
         });
@@ -121,6 +121,7 @@ class GlobalChatService {
         // Listen for chat updates
         this.socket.on('chat_updated', (updatedChat) => {
             //console.log('Chat updated:', updatedChat);
+            console.log(2);
             this.fetchAndUpdateChats();
         });
 
@@ -191,6 +192,7 @@ class GlobalChatService {
 
     async fetchAndUpdateChats() {
         try {
+            console.log('fetchAndUpdateChats');
             const response = await apiClient.get('/chat/user-chats');
             const chats = response.data;
             

@@ -150,13 +150,15 @@ const chatSlice = createSlice({
                 // Mark the chat as read in the activeChats array
                 const chatIndex = state.activeChats.findIndex(chat => chat._id === roomId);
                 if (chatIndex !== -1) {
-                    console.log(`Marking chat ${roomId} as read in Redux state`);
+                    // console.log(`Marking chat ${roomId} as read in Redux state`);
                     state.activeChats[chatIndex].hasUnread = false;
                 }
             }
         },
         setActiveChats: (state, action) => {
+            // console.log('Setting active chats:', action.payload);
             state.activeChats = action.payload;
+            // console.log('Active chats updated:', state.activeChats);
         },
         setCurrentRoom: (state, action) => {
             state.currentRoom = action.payload;

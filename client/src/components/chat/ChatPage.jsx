@@ -61,21 +61,25 @@ const ChatPage = () => {
 
     // Handle socket connection
     useEffect(() => {
-        if (token && !isConnected) {
+        if (token && userId) {
+            // Always ensure we have a connection when the component mounts
             chatService.connect(token, userId);
             dispatch(setConnected(true));
+            
+            // Fetch chats immediately after connecting
+            fetchChats();
         }
 
         return () => {
             chatService.disconnect();
             dispatch(setConnected(false));
         };
-    }, [token]);
+    }, [token, userId]);
 
-    // Set up message listeners
+    // Set up message listeners - separate from connection logic
     useEffect(() => {
-        if (!isConnected) return;
-        
+        // Set up listeners regardless of connection state
+        // The chatService will handle re-registering them when connection is established
         const handleNewMessage = (data) => {
             if (!data || !data.content) {
                 console.error('Invalid message data received:', data);
@@ -216,7 +220,7 @@ const ChatPage = () => {
             // If the message is not from the current user and not in the current room,
             // mark the chat as having unread messages
             if (!isSelfMessage && data.chat !== currentRoom) {
-                console.log(`Marking chat ${data.chat} as unread`);
+                // console.log(`Marking chat ${data.chat} as unread`);
                 dispatch(updateChatUnreadStatus({ roomId: data.chat, hasUnread: true }));
                 
                 // Also update the chat in activeChats directly to ensure the UI updates
@@ -225,6 +229,7 @@ const ChatPage = () => {
                         ? { ...chat, hasUnread: true } 
                         : chat
                 );
+                // console.log(1);
                 dispatch(setActiveChats(updatedChats));
             }
         };
@@ -247,8 +252,8 @@ const ChatPage = () => {
                 return;
             }
             
-            console.log('Chat update received:', updatedChat);
-            console.log('Has unread property:', updatedChat.hasUnread);
+            // console.log('Chat update received:', updatedChat);
+            // console.log('Has unread property:', updatedChat.hasUnread);
             
             // Find the chat in our current list
             const existingChatIndex = activeChats.findIndex(c => c._id === updatedChat._id);
@@ -267,7 +272,7 @@ const ChatPage = () => {
                     // Set hasUnread based on whether this is the current room and the updatedChat's hasUnread property
                     hasUnread: shouldBeUnread
                 };
-                console.log('Updated chat hasUnread:', updatedChats[existingChatIndex].hasUnread);
+                // console.log('Updated chat hasUnread:', updatedChats[existingChatIndex].hasUnread);
             } else {
                 // Add new chat with hasUnread property preserved
                 updatedChats.push({
@@ -283,6 +288,7 @@ const ChatPage = () => {
                 return new Date(bTime) - new Date(aTime);
             });
             
+            // console.log(2);
             dispatch(setActiveChats(updatedChats));
         };
 
@@ -303,7 +309,7 @@ const ChatPage = () => {
             chatService.offChatUpdated();
             chatService.offMessagesRead();
         };
-    }, [isConnected, currentRoom, userId]);
+    }, [currentRoom, userId]);
 
     // Handle scrolling
     useEffect(() => {
@@ -311,62 +317,66 @@ const ChatPage = () => {
     }, [messages, currentRoom]);
 
     // Fetch active chats once on mount and when connection changes
-    useEffect(() => {
-        const fetchChats = async () => {
-            if (!token) return;
+    const fetchChats = async () => {
+        if (!token) return;
 
-            try {
-                setIsLoading(true);
-                const chats = await chatService.getActiveChats();
-                
-                if (!Array.isArray(chats)) {
-                    console.error('Invalid chats data received:', chats);
-                    return;
-                }
-                
-                // Add last message to each chat object
-                const chatsWithLastMessage = await Promise.all(chats.map(async (chat) => {
-                    try {
-                        const messages = await chatService.getChatMessages(chat._id, { limit: 1 });
-                        const lastMessage = Array.isArray(messages) && messages.length > 0 ? messages[0] : null;
-                        
-                        return {
-                            ...chat,
-                            lastMessage: lastMessage ? {
-                                content: lastMessage.content || '',
-                                timestamp: lastMessage.createdAt || lastMessage.timestamp || new Date().toISOString()
-                            } : null
-                        };
-                    } catch (error) {
-                        console.error(`Error fetching last message for chat ${chat._id}:`, error);
-                        return chat;
-                    }
-                }));
+        try {
+            setIsLoading(true);
+            const chats = await chatService.getActiveChats();
+            // const result = await chatService.createRoom('111');
 
-                dispatch(setActiveChats(chatsWithLastMessage));
-                //console.log('chats3', chatsWithLastMessage);
-                setInitialized(true);
-            } catch (error) {
-                console.error('Error fetching chats:', error);
-            } finally {
-                setIsLoading(false);
+            // console.log('chats', chats);
+
+            
+            if (!Array.isArray(chats)) {
+                console.error('Invalid chats data received:', chats);
+                return;
             }
-        };
+            
+            // Add last message to each chat object
+            const chatsWithLastMessage = await Promise.all(chats.map(async (chat) => {
+                try {
+                    const messages = await chatService.getChatMessages(chat._id, { limit: 1 });
+                    const lastMessage = Array.isArray(messages) && messages.length > 0 ? messages[0] : null;
+                    
+                    return {
+                        ...chat,
+                        lastMessage: lastMessage ? {
+                            content: lastMessage.content || '',
+                            timestamp: lastMessage.createdAt || lastMessage.timestamp || new Date().toISOString()
+                        } : null
+                    };
+                } catch (error) {
+                    console.error(`Error fetching last message for chat ${chat._id}:`, error);
+                    return chat;
+                }
+            }));
 
-        // Reset state when component mounts or token changes
-        if (!token) {
-            dispatch(setActiveChats([]));
-            //console.log('chats4', []);
-            setInitialized(false);
-            return;
+            // console.log(5);
+            dispatch(setActiveChats(chatsWithLastMessage));
+            //console.log('chats3', chatsWithLastMessage);
+            setInitialized(true);
+        } catch (error) {
+            console.error('Error fetching chats:', error);
+        } finally {
+            setIsLoading(false);
         }
+    };
 
+    // Reset state when component mounts or token changes
+    if (!token) {
+        // console.log(6);
+        dispatch(setActiveChats([]));
+        //console.log('chats4', []);
+        setInitialized(false);
+        return;
+    }
+    useEffect(() => {
         fetchChats();
     }, [token]);
 
     // Initialize chat with channel
     useEffect(() => {
-        
         const initializeChat = async () => {
             if (!token || !initialized) return;
             try {
@@ -374,7 +384,7 @@ const ChatPage = () => {
                 
                 // Only try to create/select chat if channelId is provided
                 if (channelId) {
-                    ////console.log(1);
+                    // First check if we already have this chat
                     const existingChat = activeChats.find(chat => 
                         chat.participants.some(p => p._id === channelId)
                     );
@@ -382,28 +392,40 @@ const ChatPage = () => {
                     if (existingChat) {
                         await selectChat(existingChat._id);
                     } else {
+                        // Create new chat room
                         const result = await chatService.createRoom(channelId);
-                        ////console.log(result);
                         if (result) {
-                            // Update active chats with the new chat
-                            const updatedChats = activeChats.concat(result.chats);
-                            ////console.log(updatedChats);
-                            dispatch(setActiveChats(updatedChats));
-                            //console.log('chats5', updatedChats);
-                            await selectChat(result.roomId);
+                            // Merge new chats with existing ones, avoiding duplicates
+                            // console.log('result', result);
+                            let updatedChats = [...activeChats];
+                            // result.chats.forEach(newChat => {
+                            //     const existingIndex = updatedChats.findIndex(c => c._id === newChat._id);
+                            //     if (existingIndex === -1) {
+                            //         updatedChats.push(newChat);
+                            //     } else {
+                            //         updatedChats[existingIndex] = newChat;
+                            //     }
+                            // });
+                            updatedChats.unshift(result.newChat);
+                            // console.log('updatedChats', updatedChats);
+                            // console.log(3);
+                            await dispatch(setActiveChats(updatedChats));
+                            await selectChat(result.newChat._id);
+                        } else {
+                            console.error('Failed to create chat room: Invalid response');
                         }
                     }
-                } else {
-                    // If no channelId, only clear current room to show welcome screen
-                    // but keep the active chats in the sidebar
-                    const result = await chatService.createRoom('111');
-                    
-                    dispatch(setActiveChats(result.chats));
-                    //console.log('chats6', result.chats);
-                    dispatch(setCurrentRoom(null));
                 }
+                // } else {
+                //     // If no channelId, fetch initial chats
+                //     // const result = await chatService.createRoom('111');
+                //     // if (result && Array.isArray(result.chats)) {
+                //     //     dispatch(setActiveChats(result.chats));
+                //     //     dispatch(setCurrentRoom(null));
+                //     // }
             } catch (error) {
                 console.error('Error initializing chat:', error);
+                // You might want to show an error message to the user here
             } finally {
                 setIsInitializingChat(false);
             }
@@ -523,12 +545,13 @@ const ChatPage = () => {
             dispatch(markRoomAsRead(roomId));
             
             // Also update the chat in activeChats directly to ensure the UI updates
-            const updatedChats = activeChats.map(chat => 
-                chat._id === roomId 
-                    ? { ...chat, hasUnread: false } 
-                    : chat
-            );
-            dispatch(setActiveChats(updatedChats));
+            // const updatedChats = activeChats.map(chat => 
+            //     chat._id === roomId 
+            //         ? { ...chat, hasUnread: false } 
+            //         : chat
+            // );
+            // console.log(4);
+            // dispatch(setActiveChats(updatedChats));
             
             // Find the chat and get the other participant's ID
             const selectedChat = activeChats.find(chat => chat._id === roomId);
@@ -577,11 +600,14 @@ const ChatPage = () => {
     };
 
     const getCurrentChat = () => {
+        // console.log('currentRoom', currentRoom);
+        // console.log('activeChats', activeChats);
         return activeChats.find(chat => chat._id === currentRoom);
     };
 
     const getOtherParticipant = (chat) => {
         if (!chat) return null;
+        // console.log('chat', chat.participants);
         const other = chat.participants.find(p => p._id !== userId);
         return other ? {
             _id: other._id,
@@ -624,7 +650,7 @@ const ChatPage = () => {
     }, [typingUsers, currentRoom]);
 
     ////console.log('typingUsers', typingUsers[currentRoom]);
-
+    
     return (
         <div className="chat-container">
             <NavBar />
@@ -679,7 +705,8 @@ const ChatPage = () => {
                                     ) : (
                                         filteredChats.map((chat) => {
                                             const otherParticipant = getOtherParticipant(chat);
-                                            console.log(`Chat ${chat._id} hasUnread:`, chat.hasUnread);
+                                            // console.log(`Chat ${chat._id} hasUnread:`, chat.hasUnread);
+                                            
                                             
                                             // Ensure hasUnread is a boolean
                                             const isUnread = chat.hasUnread === true;
@@ -734,7 +761,9 @@ const ChatPage = () => {
                                             <div className="header-user-info">
                                                 {(() => {
                                                     const currentChat = getCurrentChat();
+                                                    // console.log(currentChat);
                                                     const otherParticipant = getOtherParticipant(currentChat);
+                                                    // console.log(otherParticipant);
                                                     
                                                     return (
                                                         <>

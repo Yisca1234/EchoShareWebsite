@@ -10,7 +10,7 @@ const {
 } = require('../controllers/chatController');
 
 // Create a new chat room
-router.post('/rooms', auth, createRoom);
+router.post('/create-room', auth, createRoom);
 
 // Get all chats for current user
 router.get('/user-chats', auth, getUserChats);

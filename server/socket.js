@@ -162,7 +162,8 @@ function setupSocket(server) {
                             ...chat.toObject(),
                             hasUnread
                         };
-                        console.log(`Sending chat update to ${participant._id.toString()} with hasUnread:`, hasUnread);
+                        
+                        // console.log(`Sending chat update to ${participant._id.toString()} with hasUnread:`, hasUnread);
                         io.to(participantSocketId).emit('chat_updated', chatToSend);
                     }
                 });

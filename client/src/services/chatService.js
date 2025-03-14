@@ -5,7 +5,11 @@ import apiClient from '../utils/apiClient';
 class ChatService {
     constructor() {
         this.socket = null;
-        
+        this.messageCallbacks = [];
+        this.typingCallbacks = [];
+        this.chatUpdatedCallbacks = [];
+        this.messagesReadCallbacks = [];
+        this.messageErrorCallbacks = [];
     }
 
     connect(token, userId) {
@@ -24,6 +28,9 @@ class ChatService {
 
         this.socket.on('connect', () => {
             //console.log('Connected to chat server with socket ID:', this.socket.id);
+            
+            // Re-register all event listeners when connection is established
+            this.registerEventListeners();
         });
 
         this.socket.on('connect_error', (err) => {
@@ -37,6 +44,51 @@ class ChatService {
                 this.socket.emit('message_error', { tempId: err.tempId });
             }
         });
+        
+        // Register event listeners immediately
+        this.registerEventListeners();
+    }
+    
+    registerEventListeners() {
+        if (!this.socket) return;
+        
+        // Clear existing listeners to prevent duplicates
+        this.socket.off('receive_message');
+        this.socket.off('user_typing');
+        this.socket.off('chat_updated');
+        this.socket.off('messages_read');
+        this.socket.off('message_error');
+        
+        // Re-register all callbacks
+        if (this.messageCallbacks.length > 0) {
+            this.messageCallbacks.forEach(callback => {
+                this.socket.on('receive_message', callback);
+            });
+        }
+        
+        if (this.typingCallbacks.length > 0) {
+            this.typingCallbacks.forEach(callback => {
+                this.socket.on('user_typing', callback);
+            });
+        }
+        
+        if (this.chatUpdatedCallbacks.length > 0) {
+            this.chatUpdatedCallbacks.forEach(callback => {
+                this.socket.on('chat_updated', callback);
+            });
+        }
+        
+        if (this.messagesReadCallbacks.length > 0) {
+            this.messagesReadCallbacks.forEach(callback => {
+                this.socket.on('messages_read', callback);
+            });
+        }
+        
+        if (this.messageErrorCallbacks.length > 0) {
+            this.messageErrorCallbacks.forEach(callback => {
+                this.socket.on('message_error', callback);
+            });
+        }
     }
 
     disconnect() {
@@ -52,34 +104,40 @@ class ChatService {
     }
 
     onReceiveMessage(callback) {
-        
         if (!this.socket) return;
         this.socket.on('receive_message', callback);
+        this.messageCallbacks.push(callback);
     }
 
     offReceiveMessage() {
         if (!this.socket) return;
         this.socket.off('receive_message');
+        this.messageCallbacks = [];
     }
 
     onMessagesRead(callback) {
         if (!this.socket) return;
         this.socket.on('messages_read', callback);
+        this.messagesReadCallbacks.push(callback);
     }
 
     offMessagesRead() {
         if (!this.socket) return;
         this.socket.off('messages_read');
+        this.messagesReadCallbacks = [];
     }
 
     onChatUpdated(callback) {
         if (!this.socket) return;
+        // console.log('onChatUpdated');
         this.socket.on('chat_updated', callback);
+        this.chatUpdatedCallbacks.push(callback);
     }
 
     offChatUpdated() {
         if (!this.socket) return;
         this.socket.off('chat_updated');
+        this.chatUpdatedCallbacks = [];
     }
 
     joinRoom(roomId) {
@@ -104,12 +162,14 @@ class ChatService {
                 callback(data);
             }
         });
+        this.typingCallbacks.push(callback);
     }
 
     offTyping() {
         if (!this.socket) return;
         //console.log('Removing typing event listener');
         this.socket.off('user_typing');
+        this.typingCallbacks = [];
     }
 
     emitTyping(roomId, userId, isTyping = true) {
@@ -120,6 +180,7 @@ class ChatService {
 
     async getActiveChats() {
         try {
+            // console.log('getActiveChats');
             const response = await apiClient.get('/chat/user-chats');
             return response.data;
         } catch (error) {
@@ -150,20 +211,21 @@ class ChatService {
 
     async createRoom(channelId) {
         try {
-            const response = await apiClient.post('/chat/rooms', {
+            if (!channelId) {
+                throw new Error('Channel ID is required');
+            }
+
+            const response = await apiClient.post('/chat/create-room', {
                 channelId
             });
             
-            if (!response.data ) {
-                throw new Error('Invalid response from server');
+            if (!response.data) {
+                throw new Error('Invalid response from server: missing or invalid chats array');
             }
-            if(channelId !== '111' && !response.data.roomId) {
-                throw new Error('Invalid response from server');
-            }
+
             
             return {
-                roomId: response.data.roomId,
-                chats: response.data.chats || []
+                newChat: response.data.newChat
             };
         } catch (error) {
             console.error('Error creating chat room:', error);
@@ -174,11 +236,13 @@ class ChatService {
     onMessageError(callback) {
         if (!this.socket) return;
         this.socket.on('message_error', callback);
+        this.messageErrorCallbacks.push(callback);
     }
 
     offMessageError() {
         if (!this.socket) return;
         this.socket.off('message_error');
+        this.messageErrorCallbacks = [];
     }
 }
 

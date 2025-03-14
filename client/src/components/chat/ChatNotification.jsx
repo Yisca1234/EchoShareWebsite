@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { clearNotifications } from '../../redux/slices/chatSlice';
 import '../../styles/ChatNotification.css';
+import chatService from '../../services/chatService';
 
 const ChatNotification = () => {
     const dispatch = useDispatch();
@@ -176,7 +177,7 @@ const ChatNotification = () => {
         }
         
         // Navigate directly to the chat page and select the room
-        navigate('/chat');
+        navigate(`/chat?channelId=${notification.roomId}`);
         
         // Clear notifications for this room
         dispatch(clearNotifications(notification.roomId));
@@ -193,13 +194,13 @@ const ChatNotification = () => {
         );
         
         // Use a small timeout to ensure the chat page is loaded before selecting the room
-        setTimeout(() => {
-            // Dispatch action to select the room directly
-            const chatService = require('../../services/chatService').default;
-            chatService.joinRoom(notification.roomId);
-            dispatch({ type: 'chat/setCurrentRoom', payload: notification.roomId });
-            dispatch({ type: 'chat/markRoomAsRead', payload: notification.roomId });
-        }, 100);
+        // setTimeout(() => {
+        //     // Dispatch action to select the room directly
+            
+        //     chatService.joinRoom(notification.roomId);
+        //     dispatch({ type: 'chat/setCurrentRoom', payload: notification.roomId });
+        //     dispatch({ type: 'chat/markRoomAsRead', payload: notification.roomId });
+        // }, 100);
     };
 
     // If no active notifications or desktop notifications are disabled, don't render anything

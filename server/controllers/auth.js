@@ -189,7 +189,7 @@ const requestPasswordReset = async (req, res) => {
     service: 'gmail',
     auth: {
       user: 'echoshareweb@gmail.com', // Your Gmail address
-      pass: 'wuof hnqe shvf blbe' 
+      pass: process.env.APP_GMAIL_PASSWORD 
     }
   });
   
@@ -218,7 +218,7 @@ const requestPasswordReset = async (req, res) => {
 const resetPassword = async (req, res) => {
   const token = req.query.token;
 
-  console.log(token);
+  // console.log(token);
   const auth = await Auth.findOne({
     confirmationToken: token,
     expirationToken: { $gt: new Date() },
