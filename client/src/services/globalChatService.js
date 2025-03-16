@@ -163,8 +163,14 @@ class GlobalChatService {
             message: messageObj
         }));
 
-        // If message is not from current user and not in current room, create notification
-        if (sender._id !== userId && data.chat !== currentRoom) {
+        // Check if the user is on the chat page
+        const isOnChatPage = window.location.pathname.includes('/chat');
+
+        // If message is not from current user and either:
+        // 1. Not in current room, OR
+        // 2. Not on chat page
+        // Then create a notification
+        if (sender._id !== userId && (data.chat !== currentRoom || !isOnChatPage)) {
             store.dispatch(addNotification({
                 roomId: data.chat,
                 message: messageObj

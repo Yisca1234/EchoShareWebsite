@@ -8,9 +8,13 @@ import ChatConnectionProvider from './components/ChatConnectionProvider'
 import ConnectionStatus from './components/ConnectionStatus'
 import { useSelector } from 'react-redux'
 import { isAuthenticated } from './redux/auth/selectors'
+import useClearCurrentRoom from './hooks/useClearCurrentRoom'
 
 function App() {
   const authenticated = useSelector(isAuthenticated);
+  
+  // Use the custom hook to clear current room when navigating away from chat page
+  useClearCurrentRoom();
 
   return (
     <ChatConnectionProvider>

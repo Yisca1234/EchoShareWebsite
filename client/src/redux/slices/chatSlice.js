@@ -105,12 +105,6 @@ const chatSlice = createSlice({
             // Add notification
             state.notifications[roomId].push(message);
             
-            // Increment unread count
-            if (!state.unreadCounts[roomId]) {
-                state.unreadCounts[roomId] = 0;
-            }
-            state.unreadCounts[roomId]++;
-            
             // Update last seen message for this room
             state.lastSeenMessages[roomId] = message.id;
         },
