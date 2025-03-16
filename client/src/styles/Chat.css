@@ -5,13 +5,12 @@
 }
 
 .chat-wrapper {
-  margin-left: 10%;
-  margin-right: 60px;
-  margin-top: auto;
-  margin-bottom: auto;
+  margin: auto;
   height: calc(100% - 1rem);
+  width: 100%;
   max-width: 1200px;
   padding: 1rem;
+  
 }
 
 .chat-main {
